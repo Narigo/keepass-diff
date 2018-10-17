@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>keepass-diff</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" type="text/css" media="screen" href="main.css" />
+</head>
+<body>
+  <h1 id="keepassdiff">keepass-diff</h1>
+
+  <p>This CLI-tool diffs two Keepass (.kdbx) files and prints their differences.</p>
+  
+  <p>Usage:</p>
+  
+  <pre><code>cargo run &lt;file-a&gt; &lt;file-b&gt;
+  </code></pre>
+  
+  <p>The CLI will ask for the password for both files individually.</p>
+  
+  <p><img src="screencast.gif" alt="Example Screencast" /></p>
+  
+  <h2 id="usedlibraries">Used libraries:</h2>
+  
+  <ul>
+  <li><a href="https://github.com/conradkdotcom/rpassword">rpassword</a> to read the passwords.</li>
+  
+  <li><a href="https://github.com/sseemayer/keepass-rs">keepass</a> to read <code>.kdbx</code> files.</li>
+  
+  <li><a href="https://github.com/BurntSushi/termcolor">termcolor</a> to print with colors.</li>
+  </ul>
+  
+  <p>Password for the Keepass demo files: <code>demopass</code></p>
+  
+  <h2 id="contributing">Contributing</h2>
+  
+  <p>Care to help? I'm pretty new to Rust, so if anyone likes to help or teach me 
+  cool stuff, please reach out!</p>
+</body>
+</html>
