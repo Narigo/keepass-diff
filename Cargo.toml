@@ -4,6 +4,7 @@ version = "0.1.0"
 authors = ["Joern Bernhardt <joern.bernhardt@googlemail.com>"]
 
 [dependencies]
+clap = "2.32.0"
 keepass = "0.1.2"
 rpassword = "2.0.0"
 termcolor = "1.0.4"
