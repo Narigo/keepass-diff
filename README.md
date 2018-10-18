@@ -14,6 +14,7 @@ The CLI will ask for the password for both files individually.
 
 ## Used libraries:
 
+* [clap](https://github.com/clap-rs/clap) to read command line arguments.
 * [rpassword](https://github.com/conradkdotcom/rpassword) to read the passwords.
 * [keepass](https://github.com/sseemayer/keepass-rs) to read `.kdbx` files.
 * [termcolor](https://github.com/BurntSushi/termcolor) to print with colors.
