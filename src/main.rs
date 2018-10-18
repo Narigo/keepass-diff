@@ -1,27 +1,61 @@
+extern crate clap;
 extern crate rpassword;
 extern crate termcolor;
 
 mod diff;
 
+use clap::{App, Arg};
 use std::cmp::max;
-use std::env;
 use termcolor::{Color, ColorChoice, ColorSpec, StandardStream, WriteColor};
 
 fn main() {
-    let args: Vec<String> = env::args().collect();
+    let matches = App::new("keepass-diff")
+        .version("0.1.0")
+        .about("Shows differences between two .kdbx files")
+        .author("Joern Bernhardt")
+        .arg(
+            Arg::with_name("INPUT-A")
+                .help("Sets the first file")
+                .required(true)
+                .index(1),
+        )
+        .arg(
+            Arg::with_name("INPUT-B")
+                .help("Sets the second file")
+                .required(true)
+                .index(2),
+        )
+        .arg(
+            Arg::with_name("password-a")
+                .long("password-a")
+                .help("Sets the password for the first file (will be asked for if omitted)")
+                .takes_value(true),
+        )
+        .arg(
+            Arg::with_name("password-b")
+                .long("password-b")
+                .help("Sets the password for the second file (will be asked for if omitted)")
+                .takes_value(true),
+        )
+        .get_matches();
 
-    match (args.get(1), args.get(2)) {
+    match (matches.value_of("INPUT_A"), matches.value_of("INPUT_B")) {
         (Some(file_a), Some(file_b)) => {
-            print!("Password for file {}: ", file_a);
-            let pass_a = rpassword::prompt_password_stdout("").unwrap();
-            print!("Password for file {}: ", file_b);
-            let pass_b = rpassword::prompt_password_stdout("").unwrap();
-            compare(
-                &file_a.as_str(),
-                &pass_a.as_str(),
-                &file_b.as_str(),
-                &pass_b.as_str(),
-            )
+            let pass_a = match matches.value_of("password-a") {
+                Some(password) => password.to_string(),
+                _ => {
+                    print!("Password for file {}: ", file_a);
+                    rpassword::prompt_password_stdout("").unwrap()
+                }
+            };
+            let pass_b = match matches.value_of("password-b") {
+                Some(password) => password.to_string(),
+                _ => {
+                    print!("Password for file {}: ", file_b);
+                    rpassword::prompt_password_stdout("").unwrap()
+                }
+            };
+            compare(&file_a, &pass_a, &file_b, &pass_b)
         }
         _ => println!("Need two .kdbx files as arguments"),
     }
