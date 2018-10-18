@@ -14,13 +14,13 @@ fn main() {
         .about("Shows differences between two .kdbx files")
         .author("Joern Bernhardt")
         .arg(
-            Arg::with_name("INPUT_A")
+            Arg::with_name("INPUT-A")
                 .help("Sets the first file")
                 .required(true)
                 .index(1),
         )
         .arg(
-            Arg::with_name("INPUT_B")
+            Arg::with_name("INPUT-B")
                 .help("Sets the second file")
                 .required(true)
                 .index(2),
