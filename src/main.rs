@@ -39,7 +39,7 @@ fn main() {
         )
         .get_matches();
 
-    match (matches.value_of("INPUT_A"), matches.value_of("INPUT_B")) {
+    match (matches.value_of("INPUT-A"), matches.value_of("INPUT-B")) {
         (Some(file_a), Some(file_b)) => {
             let pass_a = match matches.value_of("password-a") {
                 Some(password) => password.to_string(),
