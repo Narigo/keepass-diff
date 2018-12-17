@@ -62,8 +62,8 @@ fn main() {
 }
 
 fn compare(file_a: &str, password_a: &str, file_b: &str, password_b: &str) {
-    let a = diff::kdbx_to_sorted_vec(file_a, password_a);
-    let b = diff::kdbx_to_sorted_vec(file_b, password_b);
+    let a = diff::kdbx_to_sorted_vec(file_a, password_a).unwrap();
+    let b = diff::kdbx_to_sorted_vec(file_b, password_b).unwrap();
 
     let maximum = max(a.len(), b.len());
     let mut a_idx = 0;

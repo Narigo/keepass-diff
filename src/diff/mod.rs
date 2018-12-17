@@ -7,13 +7,15 @@ use std::path::Path;
 pub fn kdbx_to_sorted_vec(
   file: &str,
   password: &str,
-) -> Vec<(Vec<String>, Option<String>, Option<String>, Option<String>)> {
-  let db = File::open(Path::new(file))
+) -> Result<Vec<(Vec<String>, Option<String>, Option<String>, Option<String>)>, &str> {
+  File::open(Path::new(file))
     .map_err(|e| OpenDBError::from(e))
     .and_then(|mut db_file| Database::open(&mut db_file, password))
-    .unwrap();
-
-  accumulate_all_entries(db.root)
+    .map(|db: Database| accumulate_all_entries(db.root))
+    .map_err(|e: OpenDBError| match e {
+      OpenDBError::Crypto(_) => "Decryption error",
+      _ => "unknown error",
+    })
 }
 
 fn accumulate_all_entries(
