@@ -7,7 +7,7 @@ use std::path::Path;
 pub fn kdbx_to_sorted_vec(
   file: &str,
   password: &str,
-) -> Result<Vec<(Vec<String>, Option<String>, Option<String>, Option<String>)>, &str> {
+) -> Result<Vec<(Vec<String>, Option<String>, Option<String>, Option<String>)>, &'static str> {
   File::open(Path::new(file))
     .map_err(|e| OpenDBError::from(e))
     .and_then(|mut db_file| Database::open(&mut db_file, password))

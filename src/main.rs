@@ -18,26 +18,22 @@ fn main() {
                 .help("Sets the first file")
                 .required(true)
                 .index(1),
-        )
-        .arg(
+        ).arg(
             Arg::with_name("INPUT-B")
                 .help("Sets the second file")
                 .required(true)
                 .index(2),
-        )
-        .arg(
+        ).arg(
             Arg::with_name("password-a")
                 .long("password-a")
                 .help("Sets the password for the first file (will be asked for if omitted)")
                 .takes_value(true),
-        )
-        .arg(
+        ).arg(
             Arg::with_name("password-b")
                 .long("password-b")
                 .help("Sets the password for the second file (will be asked for if omitted)")
                 .takes_value(true),
-        )
-        .get_matches();
+        ).get_matches();
 
     match (matches.value_of("INPUT-A"), matches.value_of("INPUT-B")) {
         (Some(file_a), Some(file_b)) => {
@@ -62,38 +58,41 @@ fn main() {
 }
 
 fn compare(file_a: &str, password_a: &str, file_b: &str, password_b: &str) {
-    let a = diff::kdbx_to_sorted_vec(file_a, password_a).unwrap();
-    let b = diff::kdbx_to_sorted_vec(file_b, password_b).unwrap();
+    diff::kdbx_to_sorted_vec(file_a, password_a)
+        .and_then(|a| diff::kdbx_to_sorted_vec(file_b, password_b).map(|b| (a, b)))
+        .map(|r| match r {
+            (a, b) => {
+                let maximum = max(a.len(), b.len());
+                let mut a_idx = 0;
+                let mut b_idx = 0;
 
-    let maximum = max(a.len(), b.len());
-    let mut a_idx = 0;
-    let mut b_idx = 0;
-
-    let mut stdout = StandardStream::stdout(ColorChoice::Always);
-    while a_idx < maximum && b_idx < maximum {
-        let a_elem = a.get(a_idx);
-        let b_elem = b.get(b_idx);
-        if a_elem == b_elem {
-            a_idx = a_idx + 1;
-            b_idx = b_idx + 1;
-            continue;
-        }
-        if a_elem < b_elem {
-            stdout
-                .set_color(ColorSpec::new().set_fg(Some(Color::Red)))
-                .unwrap();
-            println!("- {:?}", a_elem.unwrap());
-            a_idx = a_idx + 1;
-            continue;
-        }
-        if b_elem < a_elem {
-            stdout
-                .set_color(ColorSpec::new().set_fg(Some(Color::Green)))
-                .unwrap();
-            println!("+ {:?}", b_elem.unwrap());
-            b_idx = b_idx + 1;
-            continue;
-        }
-    }
-    stdout.set_color(ColorSpec::new().set_fg(None)).unwrap();
+                let mut stdout = StandardStream::stdout(ColorChoice::Always);
+                while a_idx < maximum && b_idx < maximum {
+                    let a_elem = a.get(a_idx);
+                    let b_elem = b.get(b_idx);
+                    if a_elem == b_elem {
+                        a_idx = a_idx + 1;
+                        b_idx = b_idx + 1;
+                        continue;
+                    }
+                    if a_elem < b_elem {
+                        stdout
+                            .set_color(ColorSpec::new().set_fg(Some(Color::Red)))
+                            .unwrap();
+                        println!("- {:?}", a_elem.unwrap());
+                        a_idx = a_idx + 1;
+                        continue;
+                    }
+                    if b_elem < a_elem {
+                        stdout
+                            .set_color(ColorSpec::new().set_fg(Some(Color::Green)))
+                            .unwrap();
+                        println!("+ {:?}", b_elem.unwrap());
+                        b_idx = b_idx + 1;
+                        continue;
+                    }
+                }
+                stdout.set_color(ColorSpec::new().set_fg(None)).unwrap();
+            }
+        }).unwrap_or_else(|err| println!("{}", err));
 }
