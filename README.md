@@ -17,6 +17,7 @@ that this will expose them to other users logged on to the system):
 
 ```
 cargo run -- <file-a> <file-b> --password-a <password-a> --password-b <password-b>
+```
 
 (the -- is necessary for cargo to pass the arguments through to keepass-diff)
 
