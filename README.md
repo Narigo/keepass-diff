@@ -12,6 +12,15 @@ The CLI will ask for the password for both files individually.
 
 ![Example Screencast](docs/screencast.gif)
 
+You can also provide one or both passwords on the command line (please be aware
+that this will expose them to other users logged on to the system):
+
+```
+cargo run -- <file-a> <file-b> --password-a <password-a> --password-b <password-b>
+```
+
+(the -- is necessary for cargo to pass the arguments through to keepass-diff)
+
 ## Used libraries:
 
 * [rpassword](https://github.com/conradkdotcom/rpassword) to read the passwords.
