@@ -23,6 +23,7 @@ cargo run -- <file-a> <file-b> --password-a <password-a> --password-b <password-
 
 ## Used libraries:
 
+* [clap](https://clap.rs/) to read command line arguments
 * [rpassword](https://github.com/conradkdotcom/rpassword) to read the passwords.
 * [keepass](https://github.com/sseemayer/keepass-rs) to read `.kdbx` files.
 * [termcolor](https://github.com/BurntSushi/termcolor) to print with colors.
