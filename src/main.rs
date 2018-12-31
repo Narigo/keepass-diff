@@ -33,19 +33,32 @@ fn main() {
                 .long("password-b")
                 .help("Sets the password for the second file (will be asked for if omitted)")
                 .takes_value(true),
+        ).arg(
+            Arg::with_name("passwords")
+                .long("passwords")
+                .help("Sets the password for both files (if it's the same for both files)")
+                .takes_value(true),
         ).get_matches();
 
     match (matches.value_of("INPUT-A"), matches.value_of("INPUT-B")) {
         (Some(file_a), Some(file_b)) => {
-            let pass_a = match matches.value_of("password-a") {
-                Some(password) => password.to_string(),
+            let pass_a = match (
+                matches.value_of("password-a"),
+                matches.value_of("passwords"),
+            ) {
+                (Some(password), _) => password.to_string(),
+                (_, Some(password)) => password.to_string(),
                 _ => {
                     print!("Password for file {}: ", file_a);
                     rpassword::prompt_password_stdout("").unwrap()
                 }
             };
-            let pass_b = match matches.value_of("password-b") {
-                Some(password) => password.to_string(),
+            let pass_b = match (
+                matches.value_of("password-b"),
+                matches.value_of("passwords"),
+            ) {
+                (Some(password), _) => password.to_string(),
+                (_, Some(password)) => password.to_string(),
                 _ => {
                     print!("Password for file {}: ", file_b);
                     rpassword::prompt_password_stdout("").unwrap()
