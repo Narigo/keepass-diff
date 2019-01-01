@@ -21,6 +21,13 @@ cargo run -- <file-a> <file-b> --password-a <password-a> --password-b <password-
 
 (the -- is necessary for cargo to pass the arguments through to keepass-diff)
 
+If the files have the same password, you can use the `--password <password>` 
+flag. Be aware this has the same problem as above:
+
+```
+cargo run -- <file-a> <file-b> --password <password>
+```
+
 ## Used libraries:
 
 * [clap](https://clap.rs/) to read command line arguments
