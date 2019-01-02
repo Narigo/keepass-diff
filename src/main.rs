@@ -24,6 +24,12 @@ fn main() {
                 .required(true)
                 .index(2),
         ).arg(
+            Arg::with_name("no-color")
+                .short("C")
+                .long("no-color")
+                .help("Disables color output")
+                .takes_value(false),
+        ).arg(
             Arg::with_name("password-a")
                 .long("password-a")
                 .help("Sets the password for the first file (will be asked for if omitted)")
@@ -64,13 +70,14 @@ fn main() {
                     rpassword::prompt_password_stdout("").unwrap()
                 }
             };
-            compare(&file_a, &pass_a, &file_b, &pass_b)
+            let no_color: bool = matches.is_present("no-color");
+            compare(&file_a, &pass_a, &file_b, &pass_b, !no_color)
         }
         _ => println!("Need two .kdbx files as arguments"),
     }
 }
 
-fn compare(file_a: &str, password_a: &str, file_b: &str, password_b: &str) {
+fn compare(file_a: &str, password_a: &str, file_b: &str, password_b: &str, use_color: bool) {
     diff::kdbx_to_sorted_vec(file_a, password_a)
         .and_then(|a| diff::kdbx_to_sorted_vec(file_b, password_b).map(|b| (a, b)))
         .map(|r| match r {
@@ -89,23 +96,29 @@ fn compare(file_a: &str, password_a: &str, file_b: &str, password_b: &str) {
                         continue;
                     }
                     if a_elem < b_elem {
-                        stdout
-                            .set_color(ColorSpec::new().set_fg(Some(Color::Red)))
-                            .unwrap();
+                        if use_color {
+                            stdout
+                                .set_color(ColorSpec::new().set_fg(Some(Color::Red)))
+                                .unwrap();
+                        }
                         println!("- {:?}", a_elem.unwrap());
                         a_idx = a_idx + 1;
                         continue;
                     }
                     if b_elem < a_elem {
-                        stdout
-                            .set_color(ColorSpec::new().set_fg(Some(Color::Green)))
-                            .unwrap();
+                        if use_color {
+                            stdout
+                                .set_color(ColorSpec::new().set_fg(Some(Color::Green)))
+                                .unwrap();
+                        }
                         println!("+ {:?}", b_elem.unwrap());
                         b_idx = b_idx + 1;
                         continue;
                     }
                 }
-                stdout.set_color(ColorSpec::new().set_fg(None)).unwrap();
+                if use_color {
+                    stdout.set_color(ColorSpec::new().set_fg(None)).unwrap();
+                }
             }
         }).unwrap_or_else(|err| println!("{}", err));
 }
