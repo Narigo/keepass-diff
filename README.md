@@ -28,6 +28,10 @@ flag. Be aware this has the same problem as above:
 cargo run -- <file-a> <file-b> --password <password>
 ```
 
+If you want to pipe the output of the command into another file or script, you 
+may want to disable the terminal colors. You can do so with the `--no-color` or 
+`-C` flag.
+
 ## Used libraries:
 
 * [clap](https://clap.rs/) to read command line arguments
