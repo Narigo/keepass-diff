@@ -5,7 +5,6 @@ extern crate termcolor;
 mod diff;
 
 use clap::{App, Arg};
-use std::cmp::max;
 use termcolor::{Color, ColorChoice, ColorSpec, StandardStream, WriteColor};
 
 fn main() {
@@ -81,44 +80,34 @@ fn compare(file_a: &str, password_a: &str, file_b: &str, password_b: &str, use_c
     diff::kdbx_to_sorted_vec(file_a, password_a)
         .and_then(|a| diff::kdbx_to_sorted_vec(file_b, password_b).map(|b| (a, b)))
         .map(|r| match r {
-            (a, b) => {
-                let maximum = max(a.len(), b.len());
-                let mut a_idx = 0;
-                let mut b_idx = 0;
-
-                let mut stdout = StandardStream::stdout(ColorChoice::Always);
-                while a_idx < maximum && b_idx < maximum {
-                    let a_elem = a.get(a_idx);
-                    let b_elem = b.get(b_idx);
-                    if a_elem == b_elem {
-                        a_idx = a_idx + 1;
-                        b_idx = b_idx + 1;
-                        continue;
-                    }
-                    if a_elem < b_elem {
+            (a, b) => diff::compare(a, b),
+        }).map(|r| {
+            let mut i = 0;
+            let mut stdout = StandardStream::stdout(ColorChoice::Always);
+            while i < r.len() {
+                match r.get(i) {
+                    Some(diff::ComparedEntry::OnlyLeft(elem)) => {
                         if use_color {
                             stdout
                                 .set_color(ColorSpec::new().set_fg(Some(Color::Red)))
                                 .unwrap();
                         }
-                        println!("- {:?}", a_elem.unwrap());
-                        a_idx = a_idx + 1;
-                        continue;
+                        println!("- {:?}", elem)
                     }
-                    if b_elem < a_elem {
+                    Some(diff::ComparedEntry::OnlyRight(elem)) => {
                         if use_color {
                             stdout
                                 .set_color(ColorSpec::new().set_fg(Some(Color::Green)))
                                 .unwrap();
                         }
-                        println!("+ {:?}", b_elem.unwrap());
-                        b_idx = b_idx + 1;
-                        continue;
+                        println!("+ {:?}", elem)
                     }
+                    _ => {}
                 }
-                if use_color {
-                    stdout.set_color(ColorSpec::new().set_fg(None)).unwrap();
-                }
+                i = i + 1;
+            }
+            if use_color {
+                stdout.set_color(ColorSpec::new().set_fg(None)).unwrap();
             }
         }).unwrap_or_else(|err| println!("{}", err));
 }
