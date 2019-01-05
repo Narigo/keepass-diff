@@ -6,6 +6,7 @@ mod diff;
 
 use clap::{App, Arg};
 use termcolor::{Color, ColorChoice, ColorSpec, StandardStream, WriteColor};
+use diff::ComparedEntry::{OnlyLeft, OnlyRight};
 
 fn main() {
   let matches = App::new("keepass-diff")
@@ -76,17 +77,23 @@ fn main() {
   }
 }
 
+fn apply<A, B, C, F: Fn(A, B) -> C>(f: &'static F) -> impl Fn((A, B)) -> C {
+  move |args: (A, B)| {
+    let (a, b) = args;
+    f(a, b)
+  }
+}
+
 fn compare(file_a: &str, password_a: &str, file_b: &str, password_b: &str, use_color: bool) {
   diff::kdbx_to_sorted_vec(file_a, password_a)
     .and_then(|a| diff::kdbx_to_sorted_vec(file_b, password_b).map(|b| (a, b)))
-    .map(|r| match r {
-      (a, b) => diff::compare(a, b),
-    }).map(|r| {
+    .map(apply(&diff::compare))
+    .map(|r| {
       let mut i = 0;
       let mut stdout = StandardStream::stdout(ColorChoice::Always);
       while i < r.len() {
         match r.get(i) {
-          Some(diff::ComparedEntry::OnlyLeft(elem)) => {
+          Some(OnlyLeft(elem)) => {
             if use_color {
               stdout
                 .set_color(ColorSpec::new().set_fg(Some(Color::Red)))
@@ -94,7 +101,7 @@ fn compare(file_a: &str, password_a: &str, file_b: &str, password_b: &str, use_c
             }
             println!("- {:?}", elem)
           }
-          Some(diff::ComparedEntry::OnlyRight(elem)) => {
+          Some(OnlyRight(elem)) => {
             if use_color {
               stdout
                 .set_color(ColorSpec::new().set_fg(Some(Color::Green)))
