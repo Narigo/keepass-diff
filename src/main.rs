@@ -2,11 +2,13 @@ extern crate clap;
 extern crate rpassword;
 extern crate termcolor;
 
+mod apply;
 mod diff;
 
+use apply::apply;
 use clap::{App, Arg};
-use termcolor::{Color, ColorChoice, ColorSpec, StandardStream, WriteColor};
 use diff::ComparedEntry::{OnlyLeft, OnlyRight};
+use termcolor::{Color, ColorChoice, ColorSpec, StandardStream, WriteColor};
 
 fn main() {
   let matches = App::new("keepass-diff")
@@ -74,13 +76,6 @@ fn main() {
       compare(&file_a, &pass_a, &file_b, &pass_b, !no_color)
     }
     _ => println!("Need two .kdbx files as arguments"),
-  }
-}
-
-fn apply<A, B, C, F: Fn(A, B) -> C>(f: &'static F) -> impl Fn((A, B)) -> C {
-  move |args: (A, B)| {
-    let (a, b) = args;
-    f(a, b)
   }
 }
 
