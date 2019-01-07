@@ -7,7 +7,10 @@ mod diff;
 
 use apply::apply;
 use clap::{App, Arg};
-use diff::ComparedEntry::{OnlyLeft, OnlyRight};
+use diff::{
+  compare, kdbx_to_sorted_vec,
+  ComparedEntry::{OnlyLeft, OnlyRight},
+};
 use termcolor::{Color, ColorChoice, ColorSpec, StandardStream, WriteColor};
 
 fn main() {
@@ -73,16 +76,16 @@ fn main() {
         }
       };
       let no_color: bool = matches.is_present("no-color");
-      compare(&file_a, &pass_a, &file_b, &pass_b, !no_color)
+      run_comparison(&file_a, &pass_a, &file_b, &pass_b, !no_color)
     }
     _ => println!("Need two .kdbx files as arguments"),
   }
 }
 
-fn compare(file_a: &str, password_a: &str, file_b: &str, password_b: &str, use_color: bool) {
-  diff::kdbx_to_sorted_vec(file_a, password_a)
-    .and_then(|a| diff::kdbx_to_sorted_vec(file_b, password_b).map(|b| (a, b)))
-    .map(apply(&diff::compare))
+fn run_comparison(file_a: &str, password_a: &str, file_b: &str, password_b: &str, use_color: bool) {
+  kdbx_to_sorted_vec(file_a, password_a)
+    .and_then(|a| kdbx_to_sorted_vec(file_b, password_b).map(|b| (a, b)))
+    .map(apply(&compare))
     .map(|r| {
       let mut i = 0;
       let mut stdout = StandardStream::stdout(ColorChoice::Always);
