@@ -2,7 +2,7 @@
 
 This CLI-tool diffs two Keepass (.kdbx) files and prints their differences.
 
-Usage:
+## Usage
 
 ```
 cargo run <file-a> <file-b>
@@ -31,6 +31,27 @@ cargo run -- <file-a> <file-b> --passwords <password>
 If you want to pipe the output of the command into another file or script, you 
 may want to disable the terminal colors. You can do so with the `--no-color` or 
 `-C` flag.
+
+`--help` yields:
+
+```
+USAGE:
+    keepass-diff [FLAGS] [OPTIONS] <INPUT-A> <INPUT-B>
+
+FLAGS:
+    -h, --help        Prints help information
+    -C, --no-color    Disables color output
+    -V, --version     Prints version information
+
+OPTIONS:
+        --password-a <password-a>    Sets the password for the first file (will be asked for if omitted)
+        --password-b <password-b>    Sets the password for the second file (will be asked for if omitted)
+        --passwords <passwords>      Sets the password for both files (if it's the same for both files)
+
+ARGS:
+    <INPUT-A>    Sets the first file
+    <INPUT-B>    Sets the second file
+```
 
 ## Used libraries:
 
