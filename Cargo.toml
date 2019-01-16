@@ -1,5 +1,11 @@
 [package]
 name = "keepass-diff"
+description = "This CLI-tool reads two Keepass (.kdbx) files and prints their differences."
+keywords = ["cli", "diff", "keepass"]
+repository = "https://github.com/Narigo/keepass-diff"
+license = "MIT"
+license-file = "LICENSE"
+readme = "README.md"
 version = "0.1.0"
 authors = ["Joern Bernhardt <joern.bernhardt@googlemail.com>"]
 
