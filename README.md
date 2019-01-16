@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="keepass-diff.png" alt="keepass-diff" />
+  <img src="keepass-diff.svg" alt="keepass-diff" />
 </div>
 
 # keepass-diff

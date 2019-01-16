@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="286px" height="49px" viewBox="0 0 286 49" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 52.6 (67491) - http://www.bohemiancoding.com/sketch -->
+    <title>Group 2</title>
+    <desc>Created with Sketch.</desc>
+    <defs>
+        <path d="M-3.46944695e-17,32.75 L20,32.75" id="path-1"></path>
+        <path d="M9.5765625,10.75 L-3.46944695e-17,10.75 L9.5765625,10.75 L9.5765625,0 L9.5765625,10.75 Z M9.5765625,10.75 L20,10.75 L9.5765625,10.75 L9.5765625,20 L9.5765625,10.75 Z" id="path-2"></path>
+    </defs>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Group-2" transform="translate(-3.000000, -15.000000)">
+            <text id="keepass" font-family="UniNeueRegular, Uni Neue" font-size="50" font-weight="normal" fill="#000000">
+                <tspan x="0.3" y="53">keepass</tspan>
+            </text>
+            <text id="diff" font-family="UniNeueRegular, Uni Neue" font-size="50" font-weight="normal" fill="#000000">
+                <tspan x="219.575" y="53">diff</tspan>
+            </text>
+            <g id="Group" transform="translate(188.000000, 23.000000)" fill-rule="nonzero" stroke-linecap="round" stroke-linejoin="round">
+                <g id="Line">
+                    <use stroke="#000000" stroke-width="15" xlink:href="#path-1"></use>
+                    <use stroke="#FFFFFF" stroke-width="10" xlink:href="#path-1"></use>
+                    <use stroke="#D0021B" stroke-width="5" xlink:href="#path-1"></use>
+                </g>
+                <g id="Combined-Shape">
+                    <use stroke="#000000" stroke-width="15" xlink:href="#path-2"></use>
+                    <use stroke="#FFFFFF" stroke-width="10" xlink:href="#path-2"></use>
+                    <use stroke="#417505" stroke-width="5" xlink:href="#path-2"></use>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

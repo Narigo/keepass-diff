@@ -1,41 +1,80 @@
 <!DOCTYPE html>
 <html>
-<head>
-  <meta charset="utf-8" />
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <title>keepass-diff</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" type="text/css" media="screen" href="main.css" />
-</head>
-<body>
-  <h1 id="keepassdiff">keepass-diff</h1>
-
-  <p>This CLI-tool diffs two Keepass (.kdbx) files and prints their differences.</p>
-  
-  <p>Usage:</p>
-  
-  <pre><code>cargo run &lt;file-a&gt; &lt;file-b&gt;
-  </code></pre>
-  
-  <p>The CLI will ask for the password for both files individually.</p>
-  
-  <p><img src="screencast.gif" alt="Example Screencast" /></p>
-  
-  <h2 id="usedlibraries">Used libraries:</h2>
-  
-  <ul>
-  <li><a href="https://github.com/conradkdotcom/rpassword">rpassword</a> to read the passwords.</li>
-  
-  <li><a href="https://github.com/sseemayer/keepass-rs">keepass</a> to read <code>.kdbx</code> files.</li>
-  
-  <li><a href="https://github.com/BurntSushi/termcolor">termcolor</a> to print with colors.</li>
-  </ul>
-  
-  <p>Password for the Keepass demo files: <code>demopass</code></p>
-  
-  <h2 id="contributing">Contributing</h2>
-  
-  <p>Care to help? I'm pretty new to Rust, so if anyone likes to help or teach me 
-  cool stuff, please reach out!</p>
-</body>
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title>keepass-diff</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+      body {
+        font-family: sans-serif;
+      }
+      code {
+        font-family: monospace;
+      }
+    </style>
+  </head>
+  <body>
+    <div style="text-align: center;"><img src="keepass-diff.svg" alt="keepass-diff" /></div>
+    <h1><a id="keepassdiff_4"></a>keepass-diff</h1>
+    <p>This CLI-tool diffs two Keepass (.kdbx) files and prints their differences.</p>
+    <p>See the <a href="https://github.com/Narigo/keepass-diff">keepass-diff repository</a>.</p>
+    <h2><a id="Installation_8"></a>Installation</h2>
+    <pre><code>cargo install keepass-diff
+    </code></pre>
+    <h2><a id="Usage_14"></a>Usage</h2>
+    <pre><code>keepass-diff &lt;file-a&gt; &lt;file-b&gt;
+    </code></pre>
+    <p>The CLI will ask for the password for both files individually.</p>
+    <p><img src="screencast.gif" alt="Example Screencast" /></p>
+    <p>
+      You can also provide one or both passwords on the command line (please be aware<br />
+      that this will expose them to other users logged on to the system):
+    </p>
+    <pre><code>keepass-diff &lt;file-a&gt; &lt;file-b&gt; --password-a &lt;password-a&gt; --password-b &lt;password-b&gt;
+    </code></pre>
+    <p>
+      If the files have the same password, you can use the <code>--passwords &lt;password&gt;</code><br />
+      flag. Be aware this has the same problem as above:
+    </p>
+    <pre><code>keepass-diff &lt;file-a&gt; &lt;file-b&gt; --passwords &lt;password&gt;
+    </code></pre>
+    <p>
+      If you want to pipe the output of the command into another file or script, you<br />
+      may want to disable the terminal colors. You can do so with the <code>--no-color</code> or<br />
+      <code>-C</code> flag.
+    </p>
+    <p><code>--help</code> yields:</p>
+    <pre><code>USAGE:
+        keepass-diff [FLAGS] [OPTIONS] &lt;INPUT-A&gt; &lt;INPUT-B&gt;
+    
+    FLAGS:
+        -h, --help        Prints help information
+        -C, --no-color    Disables color output
+        -V, --version     Prints version information
+    
+    OPTIONS:
+            --password-a &lt;password-a&gt;    Sets the password for the first file (will be asked for if omitted)
+            --password-b &lt;password-b&gt;    Sets the password for the second file (will be asked for if omitted)
+            --passwords &lt;passwords&gt;      Sets the password for both files (if it's the same for both files)
+    
+    ARGS:
+        &lt;INPUT-A&gt;    Sets the first file
+        &lt;INPUT-B&gt;    Sets the second file
+    </code></pre>
+    <h2><a id="Used_libraries_63"></a>Used libraries:</h2>
+    <ul>
+      <li><a href="https://clap.rs/">clap</a> to read command line arguments</li>
+      <li><a href="https://github.com/conradkdotcom/rpassword">rpassword</a> to read the passwords.</li>
+      <li><a href="https://github.com/sseemayer/keepass-rs">keepass</a> to read <code>.kdbx</code> files.</li>
+      <li><a href="https://github.com/BurntSushi/termcolor">termcolor</a> to print with colors.</li>
+    </ul>
+    <h2><a id="Testing_70"></a>Testing</h2>
+    <p>Password for the Keepass demo files: <code>demopass</code></p>
+    <h2><a id="Contributing_74"></a>Contributing</h2>
+    <p>
+      Care to help? I’m pretty new to Rust, so if anyone likes to help or teach me<br />
+      cool stuff, please reach out!
+    </p>
+  </body>
 </html>
