@@ -9,7 +9,7 @@ This CLI-tool diffs two Keepass (.kdbx) files and prints their differences.
 ## Usage
 
 ```
-cargo run <file-a> <file-b>
+keepass-diff <file-a> <file-b>
 ```
 
 The CLI will ask for the password for both files individually.
@@ -20,16 +20,14 @@ You can also provide one or both passwords on the command line (please be aware
 that this will expose them to other users logged on to the system):
 
 ```
-cargo run -- <file-a> <file-b> --password-a <password-a> --password-b <password-b>
+keepass-diff <file-a> <file-b> --password-a <password-a> --password-b <password-b>
 ```
-
-(the -- is necessary for cargo to pass the arguments through to keepass-diff)
 
 If the files have the same password, you can use the `--passwords <password>` 
 flag. Be aware this has the same problem as above:
 
 ```
-cargo run -- <file-a> <file-b> --passwords <password>
+keepass-diff <file-a> <file-b> --passwords <password>
 ```
 
 If you want to pipe the output of the command into another file or script, you 
@@ -63,6 +61,8 @@ ARGS:
 * [rpassword](https://github.com/conradkdotcom/rpassword) to read the passwords.
 * [keepass](https://github.com/sseemayer/keepass-rs) to read `.kdbx` files.
 * [termcolor](https://github.com/BurntSushi/termcolor) to print with colors.
+
+## Testing
 
 Password for the Keepass demo files: `demopass`
 
