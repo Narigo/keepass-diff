@@ -8,6 +8,13 @@ readme = "README.md"
 version = "0.1.0"
 authors = ["Joern Bernhardt <joern.bernhardt@googlemail.com>"]
 
+# See https://crates.io/category_slugs
+categories = ["command-line-utilities"]
+
+exclude = [
+  "docs/*"
+]
+
 [dependencies]
 clap = "2.32.0"
 keepass = "0.1.2"
