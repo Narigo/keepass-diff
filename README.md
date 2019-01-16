@@ -6,6 +6,12 @@
 
 This CLI-tool diffs two Keepass (.kdbx) files and prints their differences.
 
+## Installation
+
+```
+cargo install keepass-diff
+```
+
 ## Usage
 
 ```
@@ -14,7 +20,7 @@ keepass-diff <file-a> <file-b>
 
 The CLI will ask for the password for both files individually.
 
-![Example Screencast](docs/screencast.gif)
+![Example Screencast](screencast.gif)
 
 You can also provide one or both passwords on the command line (please be aware
 that this will expose them to other users logged on to the system):
