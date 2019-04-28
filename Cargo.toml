@@ -17,6 +17,6 @@ exclude = [
 
 [dependencies]
 clap = "2.32.0"
-keepass = "0.1.2"
+keepass = "0.3.3"
 rpassword = "2.0.0"
 termcolor = "1.0.4"
