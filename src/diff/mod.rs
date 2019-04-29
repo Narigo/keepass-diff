@@ -1,6 +1,6 @@
 extern crate keepass;
 
-use self::keepass::{Database, Group, OpenDBError};
+use self::keepass::{result::Error, result::ErrorKind, Database, Group};
 use std::cmp::max;
 use std::fs::File;
 use std::path::Path;
@@ -45,21 +45,26 @@ pub fn compare(left: SortedKdbxEntries, right: SortedKdbxEntries) -> Vec<Compare
 
 pub fn kdbx_to_sorted_vec(
   file: &str,
-  password: &str,
+  password: Option<String>,
+  key_file: Option<&mut std::io::Read>,
 ) -> Result<SortedKdbxEntries, &'static str> {
   File::open(Path::new(file))
-    .map_err(|e| OpenDBError::from(e))
-    .and_then(|mut db_file| Database::open(&mut db_file, password))
+    .map_err(|e| Error::from(e))
+    .and_then(|mut db_file| {
+      Database::open(
+        &mut db_file,
+        password.as_ref().map(|s| s.as_str()),
+        key_file,
+      )
+    })
     .map(|db: Database| accumulate_all_entries(db.root))
-    .map_err(|e: OpenDBError| match e {
-      OpenDBError::Crypto(_) => "Decryption error",
+    .map_err(|e: Error| match e {
+      Error(ErrorKind::Crypto, _) => "Decryption error",
       _ => "unknown error",
     })
 }
 
-fn accumulate_all_entries(
-  start: Group,
-) -> SortedKdbxEntries {
+fn accumulate_all_entries(start: Group) -> SortedKdbxEntries {
   let mut accumulated = check_group(&mut Vec::new(), &mut Vec::new(), start);
   accumulated.sort();
   accumulated.dedup();
@@ -72,7 +77,7 @@ fn check_group(
   current_group: Group,
 ) -> Vec<KdbxEntry> {
   parents.push(current_group.name);
-  for entry in current_group.entries {
+  for (_, entry) in current_group.entries {
     accumulated.push((
       parents.clone(),
       entry.get_title().map(|x| x.to_string()),
@@ -80,9 +85,8 @@ fn check_group(
       entry.get_password().map(|x| x.to_string()),
     ))
   }
-  let mut all_groups_children =
-    Vec::<KdbxEntry>::new();
-  for next_parent in current_group.child_groups {
+  let mut all_groups_children = Vec::<KdbxEntry>::new();
+  for (_, next_parent) in current_group.child_groups {
     let children = check_group(&mut accumulated.clone(), &mut parents.clone(), next_parent);
     all_groups_children.append(&mut children.clone())
   }
