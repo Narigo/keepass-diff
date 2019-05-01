@@ -1,4 +1,5 @@
 extern crate clap;
+extern crate keepass;
 extern crate rpassword;
 extern crate termcolor;
 
@@ -11,9 +12,11 @@ use diff::{
   compare, kdbx_to_sorted_vec,
   ComparedEntry::{OnlyLeft, OnlyRight},
 };
+use keepass::result::Result;
+use std::{fs::File, path::Path};
 use termcolor::{Color, ColorChoice, ColorSpec, StandardStream, WriteColor};
 
-fn main() {
+fn main() -> Result<()> {
   let matches = App::new("keepass-diff")
     .version("0.1.0")
     .about("Shows differences between two .kdbx files")
@@ -55,6 +58,18 @@ fn main() {
         .help("Sets the password for both files (if it's the same for both files)")
         .takes_value(true),
     )
+    .arg(
+      Arg::with_name("keyfile-a")
+        .long("keyfile-a")
+        .help("Sets the key file for the first file")
+        .takes_value(true),
+    )
+    .arg(
+      Arg::with_name("keyfile-b")
+        .long("keyfile-b")
+        .help("Sets the key file for the second file")
+        .takes_value(true),
+    )
     .get_matches();
 
   match (matches.value_of("INPUT-A"), matches.value_of("INPUT-B")) {
@@ -84,15 +99,20 @@ fn main() {
           let password_option: Option<String> = rpassword::prompt_password_stdout("")
             .map(|s| Some(s))
             .unwrap_or(None);
-          // let password_option: Option<&str> = password_option.map(|s| s.as_str());
           password_option
         }
       };
+      let keyfile_a: Option<&str> = matches.value_of("keyfile-a");
+      let keyfile_b: Option<&str> = matches.value_of("keyfile-b");
       let no_color: bool = matches.is_present("no-color");
-      run_comparison(&file_a, pass_a, &file_b, pass_b, !no_color)
+      run_comparison(
+        &file_a, pass_a, &file_b, pass_b, !no_color, keyfile_a, keyfile_b,
+      )
     }
     _ => println!("Need two .kdbx files as arguments"),
   }
+
+  Ok(())
 }
 
 fn run_comparison(
@@ -101,9 +121,11 @@ fn run_comparison(
   file_b: &str,
   password_b: Option<String>,
   use_color: bool,
+  keyfile_a: Option<&str>,
+  keyfile_b: Option<&str>,
 ) {
-  kdbx_to_sorted_vec(file_a, password_a, None)
-    .and_then(|a| kdbx_to_sorted_vec(file_b, password_b, None).map(|b| (a, b)))
+  kdbx_to_sorted_vec(file_a, password_a, keyfile_a)
+    .and_then(|a| kdbx_to_sorted_vec(file_b, password_b, keyfile_b).map(|b| (a, b)))
     .map(apply(&compare))
     .map(|r| {
       let mut i = 0;

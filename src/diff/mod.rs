@@ -1,6 +1,6 @@
 extern crate keepass;
 
-use self::keepass::{result::Error, result::ErrorKind, Database, Group};
+use self::keepass::{result::Error, result::ErrorKind, result::Result, Database, Group};
 use std::cmp::max;
 use std::fs::File;
 use std::path::Path;
@@ -46,22 +46,22 @@ pub fn compare(left: SortedKdbxEntries, right: SortedKdbxEntries) -> Vec<Compare
 pub fn kdbx_to_sorted_vec(
   file: &str,
   password: Option<String>,
-  key_file: Option<&mut std::io::Read>,
-) -> Result<SortedKdbxEntries, &'static str> {
+  key_file: Option<&str>,
+) -> Result<SortedKdbxEntries> {
   File::open(Path::new(file))
     .map_err(|e| Error::from(e))
     .and_then(|mut db_file| {
       Database::open(
         &mut db_file,
         password.as_ref().map(|s| s.as_str()),
-        key_file,
+        None
       )
     })
     .map(|db: Database| accumulate_all_entries(db.root))
-    .map_err(|e: Error| match e {
-      Error(ErrorKind::Crypto, _) => "Decryption error",
-      _ => "unknown error",
-    })
+    // .map_err(|e: Error| match e {
+    //   Error(ErrorKind::Crypto, _) => "Decryption error",
+    //   _ => "unknown error",
+    // })
 }
 
 fn accumulate_all_entries(start: Group) -> SortedKdbxEntries {
