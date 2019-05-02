@@ -13,7 +13,6 @@ use diff::{
   ComparedEntry::{OnlyLeft, OnlyRight},
 };
 use keepass::result::Result;
-use std::{fs::File, path::Path};
 use termcolor::{Color, ColorChoice, ColorSpec, StandardStream, WriteColor};
 
 fn main() -> Result<()> {
