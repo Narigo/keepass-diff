@@ -46,9 +46,9 @@ pub fn compare(left: SortedKdbxEntries, right: SortedKdbxEntries) -> Vec<Compare
 pub fn kdbx_to_sorted_vec(
   file: &str,
   password: Option<String>,
-  key_file: Option<&str>,
+  keyfile_path: Option<&str>,
 ) -> Result<SortedKdbxEntries> {
-  let mut keyfile = key_file.map(|path| File::open(Path::new(path)).unwrap());
+  let mut keyfile = keyfile_path.map(|path| File::open(Path::new(path)).unwrap());
   File::open(Path::new(file))
     .map_err(|e| Error::from(e))
     .and_then(|mut db_file| {
