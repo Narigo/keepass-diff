@@ -20,7 +20,8 @@ pub fn compare(left: SortedKdbxEntries, right: SortedKdbxEntries) -> Vec<Compare
   let mut right_idx = 0;
 
   let mut acc = Vec::<ComparedEntry<KdbxEntry>>::new();
-  while left_idx < maximum && right_idx < maximum {
+  println!("maximum {}", maximum);
+  while left_idx < left.len() && right_idx < right.len() {
     let left_elem = left.get(left_idx);
     let right_elem = right.get(right_idx);
     if left_elem == right_elem {
@@ -35,6 +36,11 @@ pub fn compare(left: SortedKdbxEntries, right: SortedKdbxEntries) -> Vec<Compare
       continue;
     }
     if right_elem < left_elem {
+      println!("right_idx {}, left_idx {}", right_idx, left_idx);
+      match right_elem {
+        Some(x) => println!("got a right_elem {:?}", x),
+        None => println!("no right elem??"),
+      }
       acc.push(ComparedEntry::OnlyRight(right_elem.unwrap().clone()));
       right_idx = right_idx + 1;
       continue;
@@ -48,17 +54,28 @@ pub fn kdbx_to_sorted_vec(
   password: Option<String>,
   keyfile_path: Option<&str>,
 ) -> Result<SortedKdbxEntries> {
+  println!("in kdbx_to_sorted_vec");
   let mut keyfile = keyfile_path.map(|path| File::open(Path::new(path)).unwrap());
+  println!("has a keyfile path? {}", keyfile_path.is_some());
   File::open(Path::new(file))
-    .map_err(|e| Error::from(e))
+    .map_err(|e| {
+      println!("error opening file {}", file);
+      Error::from(e)
+    })
     .and_then(|mut db_file| {
-      Database::open(
+      println!("got a db_file!");
+      let db = Database::open(
         &mut db_file,
         password.as_ref().map(|s| s.as_str()),
         keyfile.as_mut().map(|f| f as &mut dyn Read),
-      )
+      );
+      println!("opened the db");
+      db
     })
-    .map(|db: Database| accumulate_all_entries(db.root))
+    .map(|db: Database| {
+      println!("accumulate_all_entries will be called!");
+      accumulate_all_entries(db.root)
+    })
 }
 
 fn accumulate_all_entries(start: Group) -> SortedKdbxEntries {
