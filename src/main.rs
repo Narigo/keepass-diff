@@ -123,31 +123,8 @@ fn run_comparison(
   keyfile_a: Option<&str>,
   keyfile_b: Option<&str>,
 ) {
-  if password_a.is_some() {
-    println!("password-a = {}", password_a.as_ref().unwrap());
-  } else {
-    println!("no password a");
-  }
-  if password_b.is_some() {
-    println!("password-b = {}", password_b.as_ref().unwrap());
-  } else {
-    println!("no password b");
-  }
-  if keyfile_a.is_some() {
-    println!("keyfile-a = {}", keyfile_a.unwrap());
-  } else {
-    println!("no keyfile a");
-  }
-  if keyfile_b.is_some() {
-    println!("keyfile-b = {}", keyfile_b.unwrap());
-  } else {
-    println!("no keyfile b");
-  }
   kdbx_to_sorted_vec(file_a, password_a, keyfile_a)
-    .and_then(|a| {
-      println!("keyfile a could be opened");
-      kdbx_to_sorted_vec(file_b, password_b, keyfile_b).map(|b| (a, b))
-    })
+    .and_then(|a| kdbx_to_sorted_vec(file_b, password_b, keyfile_b).map(|b| (a, b)))
     .map(apply(&compare))
     .map(|r| {
       let mut i = 0;
@@ -179,7 +156,6 @@ fn run_comparison(
       }
     })
     .unwrap_or_else(|err| {
-      println!("Error comparing .kdbx files:");
       println!("{}", err);
     });
 }
