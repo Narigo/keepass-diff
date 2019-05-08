@@ -21,21 +21,26 @@ pub fn compare(left: SortedKdbxEntries, right: SortedKdbxEntries) -> Vec<Compare
   while left_idx < left.len() && right_idx < right.len() {
     let left_elem = left.get(left_idx);
     let right_elem = right.get(right_idx);
-    if left_elem == right_elem {
+    if left_elem != right_elem {
+      if left_idx < right_idx {
+        left_idx = left_idx + 1;
+        acc.push(ComparedEntry::OnlyLeft(left_elem.unwrap().clone()));
+      } else if right_idx < left_idx {
+        right_idx = right_idx + 1;
+        acc.push(ComparedEntry::OnlyRight(right_elem.unwrap().clone()));
+      } else {
+        if left.len() < right.len() {
+          right_idx = right_idx + 1;
+          acc.push(ComparedEntry::OnlyRight(right_elem.unwrap().clone()));
+        } else {
+          left_idx = left_idx + 1;
+          acc.push(ComparedEntry::OnlyLeft(left_elem.unwrap().clone()));
+        }
+      }
+    } else {
       left_idx = left_idx + 1;
       right_idx = right_idx + 1;
       acc.push(ComparedEntry::Both(left_elem.unwrap().clone()));
-      continue;
-    }
-    if left_elem < right_elem {
-      acc.push(ComparedEntry::OnlyLeft(left_elem.unwrap().clone()));
-      left_idx = left_idx + 1;
-      continue;
-    }
-    if right_elem < left_elem {
-      acc.push(ComparedEntry::OnlyRight(right_elem.unwrap().clone()));
-      right_idx = right_idx + 1;
-      continue;
     }
   }
   acc
