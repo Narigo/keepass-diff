@@ -17,7 +17,7 @@ use termcolor::{Color, ColorChoice, ColorSpec, StandardStream, WriteColor};
 
 fn main() -> Result<()> {
   let matches = App::new("keepass-diff")
-    .version("0.1.0")
+    .version("0.2.0")
     .about("Shows differences between two .kdbx files")
     .author("Joern Bernhardt")
     .arg(
