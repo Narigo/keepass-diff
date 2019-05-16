@@ -1,6 +1,7 @@
 extern crate keepass;
 
 use self::keepass::{result::Error, result::Result, Database, Group};
+use std::cmp::max;
 use std::path::Path;
 use std::{fs::File, io::Read};
 
@@ -14,45 +15,40 @@ pub enum ComparedEntry<T> {
 }
 
 pub fn compare(left: SortedKdbxEntries, right: SortedKdbxEntries) -> Vec<ComparedEntry<KdbxEntry>> {
-  println!("left = {}, right = {}", left.len(), right.len());
+  let maximum = max(left.len(), right.len());
   let mut left_idx = 0;
   let mut right_idx = 0;
 
   let mut acc = Vec::<ComparedEntry<KdbxEntry>>::new();
-  while left_idx < left.len() && right_idx < right.len() {
+  while left_idx < maximum && right_idx < maximum {
     let left_elem = left.get(left_idx);
     let right_elem = right.get(right_idx);
-    if left_elem != right_elem {
-      if left_idx < right_idx {
-        left_idx = left_idx + 1;
-        acc.push(ComparedEntry::OnlyLeft(left_elem.unwrap().clone()));
-      } else if right_idx < left_idx {
-        right_idx = right_idx + 1;
-        acc.push(ComparedEntry::OnlyRight(right_elem.unwrap().clone()));
-      } else {
-        if left.len() < right.len() {
+    match (left_elem, right_elem) {
+      (Some(a), Some(b)) => {
+        if a < b {
+          left_idx = left_idx + 1;
+          acc.push(ComparedEntry::OnlyLeft(a.clone()));
+        } else if b < a {
           right_idx = right_idx + 1;
-          acc.push(ComparedEntry::OnlyRight(right_elem.unwrap().clone()));
+          acc.push(ComparedEntry::OnlyRight(b.clone()));
         } else {
           left_idx = left_idx + 1;
-          acc.push(ComparedEntry::OnlyLeft(left_elem.unwrap().clone()));
+          right_idx = right_idx + 1;
+          acc.push(ComparedEntry::Both(a.clone()));
         }
       }
-    } else {
-      left_idx = left_idx + 1;
-      right_idx = right_idx + 1;
-      acc.push(ComparedEntry::Both(left_elem.unwrap().clone()));
+      (Some(a), None) => {
+        left_idx = left_idx + 1;
+        acc.push(ComparedEntry::OnlyLeft(a.clone()));
+      }
+      (None, Some(b)) => {
+        right_idx = right_idx + 1;
+        acc.push(ComparedEntry::OnlyRight(b.clone()));
+      }
+      (None, None) => {
+        break;
+      }
     }
-  }
-  while left_idx < left.len() {
-    let left_elem = left.get(left_idx);
-    left_idx = left_idx + 1;
-    acc.push(ComparedEntry::OnlyLeft(left_elem.unwrap().clone()));
-  }
-  while right_idx < right.len() {
-    let right_elem = right.get(right_idx);
-    right_idx = right_idx + 1;
-    acc.push(ComparedEntry::OnlyRight(right_elem.unwrap().clone()));
   }
   acc
 }
