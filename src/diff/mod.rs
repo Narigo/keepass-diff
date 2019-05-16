@@ -14,6 +14,7 @@ pub enum ComparedEntry<T> {
 }
 
 pub fn compare(left: SortedKdbxEntries, right: SortedKdbxEntries) -> Vec<ComparedEntry<KdbxEntry>> {
+  println!("left = {}, right = {}", left.len(), right.len());
   let mut left_idx = 0;
   let mut right_idx = 0;
 
@@ -42,6 +43,16 @@ pub fn compare(left: SortedKdbxEntries, right: SortedKdbxEntries) -> Vec<Compare
       right_idx = right_idx + 1;
       acc.push(ComparedEntry::Both(left_elem.unwrap().clone()));
     }
+  }
+  while left_idx < left.len() {
+    let left_elem = left.get(left_idx);
+    left_idx = left_idx + 1;
+    acc.push(ComparedEntry::OnlyLeft(left_elem.unwrap().clone()));
+  }
+  while right_idx < right.len() {
+    let right_elem = right.get(right_idx);
+    right_idx = right_idx + 1;
+    acc.push(ComparedEntry::OnlyRight(right_elem.unwrap().clone()));
   }
   acc
 }
