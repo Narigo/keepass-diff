@@ -58,6 +58,24 @@ fn main() -> Result<()> {
         .takes_value(true),
     )
     .arg(
+      Arg::with_name("no-password-a")
+        .long("no-password-a")
+        .help("Sets no password for the first file (and will not ask for it)")
+        .takes_value(false),
+    )
+    .arg(
+      Arg::with_name("no-password-b")
+        .long("no-password-b")
+        .help("Sets no password for the second file (and will not ask for it)")
+        .takes_value(false),
+    )
+    .arg(
+      Arg::with_name("no-passwords")
+        .long("no-passwords")
+        .help("Sets no password for both files (and will not ask for both files)")
+        .takes_value(false),
+    )
+    .arg(
       Arg::with_name("keyfile-a")
         .long("keyfile-a")
         .help("Sets the key file for the first file")
@@ -76,9 +94,13 @@ fn main() -> Result<()> {
       let pass_a = match (
         matches.value_of("password-a"),
         matches.value_of("passwords"),
+        matches.value_of("no-password-a"),
+        matches.value_of("no-passwords"),
       ) {
-        (Some(password), _) => Some(String::from(password)),
-        (_, Some(password)) => Some(String::from(password)),
+        (Some(password), _, _, _) => Some(String::from(password)),
+        (_, Some(password), _, _) => Some(String::from(password)),
+        (_, _, None, _) => None,
+        (_, _, _, None) => None,
         _ => {
           print!("Password for file {}: ", file_a);
           let password = rpassword::prompt_password_stdout("")
@@ -90,9 +112,13 @@ fn main() -> Result<()> {
       let pass_b = match (
         matches.value_of("password-b"),
         matches.value_of("passwords"),
+        matches.value_of("no-password-b"),
+        matches.value_of("no-passwords"),
       ) {
-        (Some(password), _) => Some(String::from(password)),
-        (_, Some(password)) => Some(String::from(password)),
+        (Some(password), _, _, _) => Some(String::from(password)),
+        (_, Some(password), _, _) => Some(String::from(password)),
+        (_, _, None, _) => None,
+        (_, _, _, None) => None,
         _ => {
           print!("Password for file {}: ", file_b);
           let password_option: Option<String> = rpassword::prompt_password_stdout("")
