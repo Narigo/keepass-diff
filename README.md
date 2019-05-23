@@ -54,14 +54,17 @@ You can do so with the `--no-color` or `-C` flag.
 
 `--help` yields:
 
-````
+```
 USAGE:
     keepass-diff [FLAGS] [OPTIONS] <INPUT-A> <INPUT-B>
 
 FLAGS:
-    -h, --help        Prints help information
-    -C, --no-color    Disables color output
-    -V, --version     Prints version information
+    -h, --help             Prints help information
+    -C, --no-color         Disables color output
+        --no-password-a    Sets no password for the first file (and will not ask for it)
+        --no-password-b    Sets no password for the second file (and will not ask for it)
+        --no-passwords     Sets no password for both files (and will not ask for both files)
+    -V, --version          Prints version information
 
 OPTIONS:
         --keyfile-a <keyfile-a>      Sets the key file for the first file
