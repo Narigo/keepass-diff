@@ -69,27 +69,31 @@ FLAGS:
 OPTIONS:
         --keyfile-a <keyfile-a>      Sets the key file for the first file
         --keyfile-b <keyfile-b>      Sets the key file for the second file
+        --keyfiles <keyfiles>        Sets the same key file for both files (keyfile-a and keyfile-b would take
+                                     precedence if set as well)
         --password-a <password-a>    Sets the password for the first file (will be asked for if omitted)
         --password-b <password-b>    Sets the password for the second file (will be asked for if omitted)
         --passwords <passwords>      Sets the password for both files (if it's the same for both files)
 
 ARGS:
     <INPUT-A>    Sets the first file
-    <INPUT-B>    Sets the second file```
+    <INPUT-B>    Sets the second file
+```
 
 ## Used libraries:
 
-* [clap](https://clap.rs/) to read command line arguments
-* [rpassword](https://github.com/conradkdotcom/rpassword) to read the passwords.
-* [keepass](https://github.com/sseemayer/keepass-rs) to read `.kdbx` files.
-* [termcolor](https://github.com/BurntSushi/termcolor) to print with colors.
+- [clap](https://clap.rs/) to read command line arguments
+- [rpassword](https://github.com/conradkdotcom/rpassword) to read the passwords.
+- [keepass](https://github.com/sseemayer/keepass-rs) to read `.kdbx` files.
+- [termcolor](https://github.com/BurntSushi/termcolor) to print with colors.
 
 ## Testing
 
-Password for the Keepass demo files: `demopass`
+Password for the Keepass demo files: `demopass`.
+
+`test_file.kdbx` is locked without password and keyfile `keyfile.key`. `test2_file.kdbx` is locked with `demopass` and
+the keyfile `keyfile.key`.
 
 ## Contributing
 
-Care to help? I'm pretty new to Rust, so if anyone likes to help or teach me
-cool stuff, please reach out!
-````
+Care to help? I'm pretty new to Rust, so if anyone likes to help or teach me cool stuff, please reach out!

@@ -17,7 +17,7 @@ use termcolor::{Color, ColorChoice, ColorSpec, StandardStream, WriteColor};
 
 fn main() -> Result<()> {
   let matches = App::new("keepass-diff")
-    .version("0.2.0")
+    .version("0.3.0")
     .about("Shows differences between two .kdbx files")
     .author("Joern Bernhardt")
     .arg(
@@ -87,6 +87,12 @@ fn main() -> Result<()> {
         .help("Sets the key file for the second file")
         .takes_value(true),
     )
+    .arg(
+      Arg::with_name("keyfiles")
+        .long("keyfiles")
+        .help("Sets the same key file for both files (keyfile-a and keyfile-b would take precedence if set as well)")
+        .takes_value(true),
+    )
     .get_matches();
 
   match (matches.value_of("INPUT-A"), matches.value_of("INPUT-B")) {
@@ -94,13 +100,13 @@ fn main() -> Result<()> {
       let pass_a = match (
         matches.value_of("password-a"),
         matches.value_of("passwords"),
-        matches.value_of("no-password-a"),
-        matches.value_of("no-passwords"),
+        matches.is_present("no-password-a"),
+        matches.is_present("no-passwords"),
       ) {
         (Some(password), _, _, _) => Some(String::from(password)),
         (_, Some(password), _, _) => Some(String::from(password)),
-        (_, _, None, _) => None,
-        (_, _, _, None) => None,
+        (_, _, true, _) => None,
+        (_, _, _, true) => None,
         _ => {
           print!("Password for file {}: ", file_a);
           let password = rpassword::prompt_password_stdout("")
@@ -112,13 +118,13 @@ fn main() -> Result<()> {
       let pass_b = match (
         matches.value_of("password-b"),
         matches.value_of("passwords"),
-        matches.value_of("no-password-b"),
-        matches.value_of("no-passwords"),
+        matches.is_present("no-password-b"),
+        matches.is_present("no-passwords"),
       ) {
         (Some(password), _, _, _) => Some(String::from(password)),
         (_, Some(password), _, _) => Some(String::from(password)),
-        (_, _, None, _) => None,
-        (_, _, _, None) => None,
+        (_, _, true, _) => None,
+        (_, _, _, true) => None,
         _ => {
           print!("Password for file {}: ", file_b);
           let password_option: Option<String> = rpassword::prompt_password_stdout("")
@@ -127,8 +133,12 @@ fn main() -> Result<()> {
           password_option
         }
       };
-      let keyfile_a: Option<&str> = matches.value_of("keyfile-a");
-      let keyfile_b: Option<&str> = matches.value_of("keyfile-b");
+      let keyfile_a: Option<&str> = matches
+        .value_of("keyfile-a")
+        .or(matches.value_of("keyfiles"));
+      let keyfile_b: Option<&str> = matches
+        .value_of("keyfile-b")
+        .or(matches.value_of("keyfiles"));
       let no_color: bool = matches.is_present("no-color");
       run_comparison(
         &file_a, pass_a, &file_b, pass_b, !no_color, keyfile_a, keyfile_b,
