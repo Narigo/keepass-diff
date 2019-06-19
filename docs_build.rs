@@ -5,15 +5,18 @@
 //!
 //! ```cargo
 //! [dependencies]
+//! heck = "0.3.1"
 //! pulldown-cmark = "0.5.2"
 //! ```
 
+extern crate heck;
 extern crate pulldown_cmark;
 
 use std::fs::File;
-use std::io::BufReader;
+use std::io::{BufReader, BufWriter};
 use std::io::prelude::*;
 use pulldown_cmark::{Parser, Options, Event, Tag, CowStr, InlineStr, html};
+use heck::KebabCase;
 
 fn main() -> std::io::Result<()> {
   let file = File::open("README.md")?;
@@ -26,18 +29,14 @@ fn main() -> std::io::Result<()> {
   let mut in_header_level = 0;
   let parser = parser.map(|event| match event {
     Event::Start(Tag::Header(num)) => {
-      println!("this is header: {}", num);
       in_header_level = num;
       Event::Html(CowStr::Borrowed(""))
     },
     Event::Text(text) => {
       if in_header_level > 0 {
-        println!("anchor {}", text);
-        let result_html = format!("<h{}>{}</h{}>", in_header_level, text, in_header_level);
-        println!("should convert to: {}", result_html);
-        Event::Html(CowStr::Borrowed("<h1>this is me returning text"))
+        let result_html = format!("<h{} id=\"{}\">{}</h{}>", in_header_level, text.to_kebab_case(), text, in_header_level);
+        Event::Html(result_html.into())
       } else {
-        println!("not in header");
         Event::Text(text)
       }
     },
@@ -52,6 +51,12 @@ fn main() -> std::io::Result<()> {
   let mut html_output = String::new();
   html::push_html(&mut html_output, parser);
 
-  println!("{}", html_output);
-  Ok(())
+  let template = File::open("docs_template.html")?;
+  let mut contents = String::new();
+  buf_reader = BufReader::new(template);
+  buf_reader.read_to_string(&mut contents)?;
+  contents = contents.replace("%%content%%", &html_output);
+
+  let mut file = File::create("docs/index.html")?;
+  file.write_all(contents.as_bytes())
 }
