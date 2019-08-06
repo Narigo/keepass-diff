@@ -1,8 +1,6 @@
-<div align="center">
+<p align="center" style="text-align: center;">
   <img src="keepass-diff.svg" alt="keepass-diff" />
-</div>
-
-# keepass-diff
+</p>
 
 This CLI-tool diffs two Keepass (.kdbx) files and prints their differences.
 
