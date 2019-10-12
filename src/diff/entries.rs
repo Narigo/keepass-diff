@@ -5,7 +5,7 @@ use keepass::Group;
 
 use std::cmp::max;
 
-use termcolor::{Color, ColorChoice, ColorSpec, StandardStream, WriteColor};
+use termcolor::Color;
 
 /// Corresponds to a sorted Vec of KdbxEntry objects that can be diffed
 #[derive(Debug)]
