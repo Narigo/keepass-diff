@@ -7,7 +7,7 @@ mod diff;
 mod entry;
 
 use clap::{App, Arg};
-use diff::{entries::Entries, Diff, DiffDisplay};
+use diff::{group::Entries, Diff, DiffDisplay};
 use keepass::{result::Error, result::Result, Database};
 
 #[allow(unused_imports)]
@@ -140,68 +140,28 @@ fn main() -> Result<()> {
             let keyfile_b: Option<&str> = matches
                 .value_of("keyfile-b")
                 .or(matches.value_of("keyfiles"));
-            let no_color: bool = matches.is_present("no-color");
-            run_comparison(
-                &file_a, pass_a, &file_b, pass_b, !no_color, keyfile_a, keyfile_b,
-            )
+            let use_color: bool = !matches.is_present("no-color");
+
+            let db_a =
+                kdbx_to_sorted_vec(file_a, pass_a, keyfile_a).expect("Error opening database A");
+            let db_b =
+                kdbx_to_sorted_vec(file_b, pass_b, keyfile_b).expect("Error opening database A");
+
+            let delta = db_a.diff(&db_b);
+
+            println!(
+                "{}",
+                DiffDisplay {
+                    inner: delta,
+                    depth: 0,
+                    use_color
+                }
+            );
         }
         _ => println!("Need two .kdbx files as arguments"),
     }
 
     Ok(())
-}
-
-fn run_comparison(
-    file_a: &str,
-    password_a: Option<String>,
-    file_b: &str,
-    password_b: Option<String>,
-    use_color: bool,
-    keyfile_a: Option<&str>,
-    keyfile_b: Option<&str>,
-) {
-    let db_a = kdbx_to_sorted_vec(file_a, password_a, keyfile_a).expect("Error opening database A");
-    let db_b = kdbx_to_sorted_vec(file_b, password_b, keyfile_b).expect("Error opening database A");
-
-    let delta = db_a.diff(&db_b);
-
-    println!(
-        "{}",
-        DiffDisplay {
-            inner: delta,
-            depth: 0,
-            use_color
-        }
-    );
-    /*
-    let mut i = 0;
-    let mut stdout = StandardStream::stdout(ColorChoice::Always);
-    while i < r.len() {
-        match r.get(i) {
-            Some(OnlyLeft(elem)) => {
-                if use_color {
-                    stdout
-                        .set_color(ColorSpec::new().set_fg(Some(Color::Red)))
-                        .unwrap();
-                }
-                println!("- {:?}", elem)
-            }
-            Some(OnlyRight(elem)) => {
-                if use_color {
-                    stdout
-                        .set_color(ColorSpec::new().set_fg(Some(Color::Green)))
-                        .unwrap();
-                }
-                println!("+ {:?}", elem)
-            }
-            _ => {}
-        }
-        i = i + 1;
-    }
-    if use_color {
-        stdout.set_color(ColorSpec::new().set_fg(None)).unwrap();
-    }
-    */
 }
 
 pub fn kdbx_to_sorted_vec(
