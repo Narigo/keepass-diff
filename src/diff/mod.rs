@@ -6,18 +6,18 @@ use std::{fs::File, io::Read};
 
 type SortedKdbxEntries = Vec<KdbxEntry>;
 
-pub enum ComparedEntry<T> {
-    Both(T),
-    OnlyLeft(T),
-    OnlyRight(T),
+pub enum ComparedEntry {
+    Both(KdbxEntry),
+    OnlyLeft(KdbxEntry),
+    OnlyRight(KdbxEntry),
 }
 
-pub fn compare(left: SortedKdbxEntries, right: SortedKdbxEntries) -> Vec<ComparedEntry<KdbxEntry>> {
+pub fn compare(left: SortedKdbxEntries, right: SortedKdbxEntries) -> Vec<ComparedEntry> {
     let maximum = max(left.len(), right.len());
     let mut left_idx = 0;
     let mut right_idx = 0;
 
-    let mut acc = Vec::<ComparedEntry<KdbxEntry>>::new();
+    let mut acc = Vec::new();
     while left_idx < maximum && right_idx < maximum {
         let left_elem = left.get(left_idx);
         let right_elem = right.get(right_idx);
