@@ -5,6 +5,7 @@ extern crate termcolor;
 
 mod apply;
 mod diff;
+mod entry;
 
 use apply::apply;
 use clap::{App, Arg};

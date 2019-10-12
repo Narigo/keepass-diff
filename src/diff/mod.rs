@@ -1,11 +1,9 @@
-extern crate keepass;
-
-use self::keepass::{result::Error, result::Result, Database, Group};
+use crate::entry::KdbxEntry;
+use keepass::{result::Error, result::Result, Database, Group};
 use std::cmp::max;
 use std::path::Path;
 use std::{fs::File, io::Read};
 
-type KdbxEntry = (Vec<String>, Option<String>, Option<String>, Option<String>);
 type SortedKdbxEntries = Vec<KdbxEntry>;
 
 pub enum ComparedEntry<T> {
@@ -86,12 +84,7 @@ fn check_group(
 ) -> Vec<KdbxEntry> {
     parents.push(current_group.name);
     for (_, entry) in current_group.entries {
-        accumulated.push((
-            parents.clone(),
-            entry.get_title().map(|x| x.to_string()),
-            entry.get_username().map(|x| x.to_string()),
-            entry.get_password().map(|x| x.to_string()),
-        ))
+        accumulated.push(KdbxEntry::from_keepass(parents, &entry));
     }
     let mut all_groups_children = Vec::<KdbxEntry>::new();
     for (_, next_parent) in current_group.child_groups {
