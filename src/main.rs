@@ -7,7 +7,7 @@ mod diff;
 mod entry;
 
 use clap::{App, Arg};
-use diff::{group::Entries, Diff, DiffDisplay};
+use diff::{group::Group, Diff, DiffDisplay};
 use keepass::{result::Error, result::Result, Database};
 
 #[allow(unused_imports)]
@@ -168,7 +168,7 @@ pub fn kdbx_to_sorted_vec(
     file: &str,
     password: Option<String>,
     keyfile_path: Option<&str>,
-) -> Result<Entries> {
+) -> Result<Group> {
     let mut keyfile = keyfile_path.map(|path| File::open(Path::new(path)).unwrap());
     File::open(Path::new(file))
         .map_err(|e| Error::from(e))
@@ -180,7 +180,7 @@ pub fn kdbx_to_sorted_vec(
             );
             db
         })
-        .map(|db: Database| Entries::from_keepass(db.root))
+        .map(|db: Database| Group::from_keepass(db.root))
 }
 
 pub fn set_fg(color: Option<Color>) {

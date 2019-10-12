@@ -1,19 +1,17 @@
 use crate::diff::{Diff, DiffResult, DiffResultFormat};
 use crate::entry::KdbxEntry;
 
-use keepass::Group;
-
 use std::cmp::max;
 
 use termcolor::Color;
 
 /// Corresponds to a sorted Vec of KdbxEntry objects that can be diffed
 #[derive(Debug)]
-pub struct Entries {
+pub struct Group {
     entries: Vec<KdbxEntry>,
 }
 
-impl Entries {
+impl Group {
     /// Create an entries list from a keepass::Group
     pub fn from_keepass(root: keepass::Group) -> Self {
         let mut entries = Vec::new();
@@ -22,16 +20,16 @@ impl Entries {
         entries.sort();
         entries.dedup();
 
-        Entries { entries }
+        Group { entries }
     }
 }
 
-impl Diff for Entries {
+impl Diff for Group {
     type Inner = KdbxEntry;
     type InnerInner = ();
     fn diff<'a>(
         &'a self,
-        other: &'a Entries,
+        other: &'a Group,
     ) -> DiffResult<'a, Self, DiffResult<'a, Self::Inner, Self::InnerInner>> {
         let left = &self.entries;
         let right = &other.entries;
@@ -100,7 +98,7 @@ impl Diff for Entries {
 fn check_group(
     mut accumulated: &mut Vec<KdbxEntry>,
     parents: &Vec<String>,
-    current_group: &Group,
+    current_group: &keepass::Group,
 ) -> Vec<KdbxEntry> {
     // make new path containing current group name
     let mut parents = parents.clone();
@@ -118,7 +116,7 @@ fn check_group(
     accumulated.clone()
 }
 
-impl<'a> DiffResultFormat for DiffResult<'a, Entries, DiffResult<'a, KdbxEntry, ()>> {
+impl<'a> DiffResultFormat for DiffResult<'a, Group, DiffResult<'a, KdbxEntry, ()>> {
     fn diff_result_format(
         &self,
         mut f: &mut std::fmt::Formatter<'_>,
