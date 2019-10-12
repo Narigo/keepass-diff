@@ -4,7 +4,6 @@ extern crate rpassword;
 extern crate termcolor;
 
 mod diff;
-mod entry;
 
 use clap::{App, Arg};
 use diff::{group::Group, Diff, DiffDisplay};

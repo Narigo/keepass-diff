@@ -1,5 +1,5 @@
+use crate::diff::entry::Entry;
 use crate::diff::{Diff, DiffResult, DiffResultFormat};
-use crate::entry::KdbxEntry;
 
 use std::cmp::max;
 
@@ -8,7 +8,7 @@ use termcolor::Color;
 /// Corresponds to a sorted Vec of KdbxEntry objects that can be diffed
 #[derive(Debug)]
 pub struct Group {
-    entries: Vec<KdbxEntry>,
+    entries: Vec<Entry>,
 }
 
 impl Group {
@@ -25,7 +25,7 @@ impl Group {
 }
 
 impl Diff for Group {
-    type Inner = KdbxEntry;
+    type Inner = Entry;
     type InnerInner = ();
     fn diff<'a>(
         &'a self,
@@ -96,17 +96,17 @@ impl Diff for Group {
 
 /// Recursively add all entries from current_group and its children to the accumulated Vec
 fn check_group(
-    mut accumulated: &mut Vec<KdbxEntry>,
+    mut accumulated: &mut Vec<Entry>,
     parents: &Vec<String>,
     current_group: &keepass::Group,
-) -> Vec<KdbxEntry> {
+) -> Vec<Entry> {
     // make new path containing current group name
     let mut parents = parents.clone();
     parents.push(current_group.name.to_owned());
 
     // add all entries
     for (_, entry) in &current_group.entries {
-        accumulated.push(KdbxEntry::from_keepass(&parents, &entry));
+        accumulated.push(Entry::from_keepass(&parents, &entry));
     }
 
     // recursively get all children
@@ -116,7 +116,7 @@ fn check_group(
     accumulated.clone()
 }
 
-impl<'a> DiffResultFormat for DiffResult<'a, Group, DiffResult<'a, KdbxEntry, ()>> {
+impl<'a> DiffResultFormat for DiffResult<'a, Group, DiffResult<'a, Entry, ()>> {
     fn diff_result_format(
         &self,
         mut f: &mut std::fmt::Formatter<'_>,
@@ -140,47 +140,6 @@ impl<'a> DiffResultFormat for DiffResult<'a, Group, DiffResult<'a, KdbxEntry, ()
             }
             _ => write!(f, "this should not happen"),
         }?;
-
-        if use_color {
-            crate::set_fg(None);
-        }
-
-        Ok(())
-    }
-}
-
-impl<'a> DiffResultFormat for DiffResult<'a, KdbxEntry, ()> {
-    fn diff_result_format(
-        &self,
-        f: &mut std::fmt::Formatter<'_>,
-        depth: usize,
-        use_color: bool,
-    ) -> std::fmt::Result {
-        let indent = "  ".repeat(depth);
-        match self {
-            DiffResult::Identical { .. } => {
-                write!(f, "")?;
-            }
-            DiffResult::InnerDifferences { left, .. } => {
-                // TODO recursively list differences within entries
-                if use_color {
-                    crate::set_fg(Some(Color::Yellow));
-                }
-                write!(f, "{}~ Entry '{}'\n", indent, left.get_title())?;
-            }
-            DiffResult::OnlyLeft { left } => {
-                if use_color {
-                    crate::set_fg(Some(Color::Red));
-                }
-                write!(f, "{}- Entry '{}'\n", indent, left.get_title())?;
-            }
-            DiffResult::OnlyRight { right } => {
-                if use_color {
-                    crate::set_fg(Some(Color::Green));
-                }
-                write!(f, "{}+ Entry '{}'\n", indent, right.get_title())?;
-            }
-        }
 
         if use_color {
             crate::set_fg(None);

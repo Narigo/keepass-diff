@@ -1,3 +1,4 @@
+pub mod entry;
 pub mod group;
 
 /// The possible outcomes of diffing two objects against another
