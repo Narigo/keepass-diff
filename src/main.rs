@@ -3,18 +3,18 @@ extern crate keepass;
 extern crate rpassword;
 extern crate termcolor;
 
-mod apply;
 mod diff;
 mod entry;
 
-use apply::apply;
 use clap::{App, Arg};
-use diff::{
-    compare, kdbx_to_sorted_vec,
-    ComparedEntry::{OnlyLeft, OnlyRight},
-};
-use keepass::result::Result;
+use diff::{entries::Entries, Diff};
+use keepass::{result::Error, result::Result, Database};
+
+#[allow(unused_imports)]
 use termcolor::{Color, ColorChoice, ColorSpec, StandardStream, WriteColor};
+
+use std::path::Path;
+use std::{fs::File, io::Read};
 
 fn main() -> Result<()> {
     let matches = App::new("keepass-diff")
@@ -160,39 +160,58 @@ fn run_comparison(
     keyfile_a: Option<&str>,
     keyfile_b: Option<&str>,
 ) {
-    kdbx_to_sorted_vec(file_a, password_a, keyfile_a)
-        .and_then(|a| kdbx_to_sorted_vec(file_b, password_b, keyfile_b).map(|b| (a, b)))
-        .map(apply(&compare))
-        .map(|r| {
-            let mut i = 0;
-            let mut stdout = StandardStream::stdout(ColorChoice::Always);
-            while i < r.len() {
-                match r.get(i) {
-                    Some(OnlyLeft(elem)) => {
-                        if use_color {
-                            stdout
-                                .set_color(ColorSpec::new().set_fg(Some(Color::Red)))
-                                .unwrap();
-                        }
-                        println!("- {:?}", elem)
-                    }
-                    Some(OnlyRight(elem)) => {
-                        if use_color {
-                            stdout
-                                .set_color(ColorSpec::new().set_fg(Some(Color::Green)))
-                                .unwrap();
-                        }
-                        println!("+ {:?}", elem)
-                    }
-                    _ => {}
+    let db_a = kdbx_to_sorted_vec(file_a, password_a, keyfile_a).expect("Error opening database A");
+    let db_b = kdbx_to_sorted_vec(file_b, password_b, keyfile_b).expect("Error opening database A");
+
+    let delta = db_a.diff(&db_b);
+
+    println!("{:#?}", delta);
+    /*
+    let mut i = 0;
+    let mut stdout = StandardStream::stdout(ColorChoice::Always);
+    while i < r.len() {
+        match r.get(i) {
+            Some(OnlyLeft(elem)) => {
+                if use_color {
+                    stdout
+                        .set_color(ColorSpec::new().set_fg(Some(Color::Red)))
+                        .unwrap();
                 }
-                i = i + 1;
+                println!("- {:?}", elem)
             }
-            if use_color {
-                stdout.set_color(ColorSpec::new().set_fg(None)).unwrap();
+            Some(OnlyRight(elem)) => {
+                if use_color {
+                    stdout
+                        .set_color(ColorSpec::new().set_fg(Some(Color::Green)))
+                        .unwrap();
+                }
+                println!("+ {:?}", elem)
             }
+            _ => {}
+        }
+        i = i + 1;
+    }
+    if use_color {
+        stdout.set_color(ColorSpec::new().set_fg(None)).unwrap();
+    }
+    */
+}
+
+pub fn kdbx_to_sorted_vec(
+    file: &str,
+    password: Option<String>,
+    keyfile_path: Option<&str>,
+) -> Result<Entries> {
+    let mut keyfile = keyfile_path.map(|path| File::open(Path::new(path)).unwrap());
+    File::open(Path::new(file))
+        .map_err(|e| Error::from(e))
+        .and_then(|mut db_file| {
+            let db = Database::open(
+                &mut db_file,
+                password.as_ref().map(|s| s.as_str()),
+                keyfile.as_mut().map(|f| f as &mut dyn Read),
+            );
+            db
         })
-        .unwrap_or_else(|err| {
-            println!("{}", err);
-        });
+        .map(|db: Database| Entries::from_keepass(db.root))
 }
