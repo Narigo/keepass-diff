@@ -7,7 +7,7 @@ mod diff;
 mod entry;
 
 use clap::{App, Arg};
-use diff::{entries::Entries, Diff};
+use diff::{entries::Entries, Diff, DiffDisplay};
 use keepass::{result::Error, result::Result, Database};
 
 #[allow(unused_imports)]
@@ -165,7 +165,14 @@ fn run_comparison(
 
     let delta = db_a.diff(&db_b);
 
-    println!("{:#?}", delta);
+    println!(
+        "{}",
+        DiffDisplay {
+            inner: delta,
+            depth: 0,
+            use_color
+        }
+    );
     /*
     let mut i = 0;
     let mut stdout = StandardStream::stdout(ColorChoice::Always);
@@ -214,4 +221,9 @@ pub fn kdbx_to_sorted_vec(
             db
         })
         .map(|db: Database| Entries::from_keepass(db.root))
+}
+
+pub fn set_fg(color: Option<Color>) {
+    let mut stdout = StandardStream::stdout(ColorChoice::Always);
+    stdout.set_color(ColorSpec::new().set_fg(color)).unwrap();
 }

@@ -32,6 +32,10 @@ impl KdbxEntry {
 
         KdbxEntry { path, fields }
     }
+
+    pub fn get_title(&self) -> &str {
+        self.path.get(self.path.len() - 1).unwrap()
+    }
 }
 
 /// Sort KdbxEntry by their paths

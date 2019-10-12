@@ -1,9 +1,11 @@
-use crate::diff::{Diff, DiffResult};
+use crate::diff::{Diff, DiffResult, DiffResultFormat};
 use crate::entry::KdbxEntry;
 
 use keepass::Group;
 
 use std::cmp::max;
+
+use termcolor::{Color, ColorChoice, ColorSpec, StandardStream, WriteColor};
 
 /// Corresponds to a sorted Vec of KdbxEntry objects that can be diffed
 #[derive(Debug)]
@@ -81,6 +83,8 @@ impl Diff for Entries {
 
         if has_differences {
             DiffResult::InnerDifferences {
+                left: self,
+                right: other,
                 inner_differences: acc,
             }
         } else {
@@ -112,4 +116,78 @@ fn check_group(
         check_group(&mut accumulated, &parents, &group);
     }
     accumulated.clone()
+}
+
+impl<'a> DiffResultFormat for DiffResult<'a, Entries, DiffResult<'a, KdbxEntry, ()>> {
+    fn diff_result_format(
+        &self,
+        mut f: &mut std::fmt::Formatter<'_>,
+        depth: usize,
+        use_color: bool,
+    ) -> std::fmt::Result {
+        let indent = "  ".repeat(depth);
+        match self {
+            DiffResult::Identical { .. } => write!(f, ""),
+            DiffResult::InnerDifferences {
+                inner_differences, ..
+            } => {
+                if use_color {
+                    crate::set_fg(Some(Color::Yellow));
+                }
+                write!(f, "{}~\n", indent)?;
+                for id in inner_differences {
+                    id.diff_result_format(&mut f, depth + 1, use_color)?;
+                }
+                write!(f, "\n")
+            }
+            _ => write!(f, "this should not happen"),
+        }?;
+
+        if use_color {
+            crate::set_fg(None);
+        }
+
+        Ok(())
+    }
+}
+
+impl<'a> DiffResultFormat for DiffResult<'a, KdbxEntry, ()> {
+    fn diff_result_format(
+        &self,
+        f: &mut std::fmt::Formatter<'_>,
+        depth: usize,
+        use_color: bool,
+    ) -> std::fmt::Result {
+        let indent = "  ".repeat(depth);
+        match self {
+            DiffResult::Identical { .. } => {
+                write!(f, "")?;
+            }
+            DiffResult::InnerDifferences { left, .. } => {
+                // TODO recursively list differences within entries
+                if use_color {
+                    crate::set_fg(Some(Color::Yellow));
+                }
+                write!(f, "{}~ Entry '{}'\n", indent, left.get_title())?;
+            }
+            DiffResult::OnlyLeft { left } => {
+                if use_color {
+                    crate::set_fg(Some(Color::Red));
+                }
+                write!(f, "{}- Entry '{}'\n", indent, left.get_title())?;
+            }
+            DiffResult::OnlyRight { right } => {
+                if use_color {
+                    crate::set_fg(Some(Color::Green));
+                }
+                write!(f, "{}+ Entry '{}'\n", indent, right.get_title())?;
+            }
+        }
+
+        if use_color {
+            crate::set_fg(None);
+        }
+
+        Ok(())
+    }
 }
