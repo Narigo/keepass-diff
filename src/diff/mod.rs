@@ -2,6 +2,7 @@ use std::collections::{HashMap, HashSet};
 use termcolor::Color;
 
 pub mod entry;
+pub mod field;
 pub mod group;
 
 /// The possible outcomes of diffing two objects against another
@@ -9,6 +10,8 @@ pub mod group;
 pub enum DiffResult<'a, T> {
     /// The objects are identical, including any children
     Identical { left: &'a T, right: &'a T },
+    /// The objects have changed value
+    Changed { left: &'a T, right: &'a T },
     /// There is a difference in a child object
     InnerDifferences {
         left: &'a T,
@@ -67,6 +70,16 @@ where
         let indent = "  ".repeat(depth);
         match self {
             DiffResult::Identical { .. } => Ok(()),
+            DiffResult::Changed { left, right } => {
+                if use_color {
+                    crate::set_fg(Some(Color::Red));
+                }
+                write!(f, "{}- {}\n", indent, left)?;
+                if use_color {
+                    crate::set_fg(Some(Color::Green));
+                }
+                write!(f, "{}+ {}\n", indent, right)
+            }
             DiffResult::InnerDifferences {
                 left,
                 inner_differences,
@@ -79,7 +92,7 @@ where
                 for id in inner_differences {
                     id.diff_result_format(&mut f, depth + 1, use_color)?;
                 }
-                write!(f, "\n")
+                Ok(())
             }
             DiffResult::OnlyLeft { left } => {
                 if use_color {
