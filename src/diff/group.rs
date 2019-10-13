@@ -1,89 +1,123 @@
 use crate::diff::entry::Entry;
 use crate::diff::{Diff, DiffResult, DiffResultFormat};
 
-use std::cmp::max;
-
-use termcolor::Color;
+use std::collections::{HashMap, HashSet};
 
 /// Corresponds to a sorted Vec of KdbxEntry objects that can be diffed
 #[derive(Debug)]
 pub struct Group {
-    entries: Vec<Entry>,
+    name: String,
+    child_groups: HashMap<String, Group>,
+    entries: HashMap<String, Entry>,
 }
 
 impl Group {
     /// Create an entries list from a keepass::Group
-    pub fn from_keepass(root: keepass::Group) -> Self {
-        let mut entries = Vec::new();
-        check_group(&mut entries, &Vec::new(), &root);
+    pub fn from_keepass(group: &keepass::Group) -> Self {
+        let child_groups = group
+            .child_groups
+            .iter()
+            .map(|(k, v)| (k.clone(), Group::from_keepass(&v)))
+            .collect();
 
-        entries.sort();
-        entries.dedup();
+        let entries = group
+            .entries
+            .iter()
+            .map(|(k, v)| (k.clone(), Entry::from_keepass(&v)))
+            .collect();
 
-        Group { entries }
+        Group {
+            name: group.name.to_owned(),
+            child_groups,
+            entries,
+        }
     }
 }
 
-impl Diff for Group {
-    type Inner = Entry;
-    type InnerInner = ();
-    fn diff<'a>(
-        &'a self,
-        other: &'a Group,
-    ) -> DiffResult<'a, Self, DiffResult<'a, Self::Inner, Self::InnerInner>> {
-        let left = &self.entries;
-        let right = &other.entries;
+impl std::fmt::Display for Group {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "Group '{}'", self.name)
+    }
+}
 
-        let maximum = max(left.len(), right.len());
+/// Compare to HashMaps of the same value type with each other, returning a bool indicating whether
+/// there are any differences and a Vec<DiffResult<A>> listing all differences
+pub fn diff_hashmap<'a, A>(
+    a: &'a HashMap<String, A>,
+    b: &'a HashMap<String, A>,
+) -> (bool, Vec<DiffResult<'a, A>>)
+where
+    A: Diff,
+{
+    let mut keys = HashSet::new();
+    keys.extend(a.keys());
+    keys.extend(b.keys());
 
-        let mut left_idx = 0;
-        let mut right_idx = 0;
+    let mut keys: Vec<_> = keys.iter().collect();
+    keys.sort();
 
-        let mut acc = Vec::new();
+    let mut acc: Vec<DiffResult<A>> = Vec::new();
 
-        let mut has_differences = false;
+    let mut has_differences = false;
 
-        // keep going until the indices both point to the end
-        while left_idx < maximum && right_idx < maximum {
-            let left_elem = left.get(left_idx);
-            let right_elem = right.get(right_idx);
-            match (left_elem, right_elem) {
-                (Some(a), Some(b)) => {
-                    if a < b {
-                        left_idx = left_idx + 1;
-                        acc.push(DiffResult::OnlyLeft { left: a });
-                        has_differences = true;
-                    } else if b < a {
-                        right_idx = right_idx + 1;
-                        acc.push(DiffResult::OnlyRight { right: b });
-                        has_differences = true;
-                    } else {
-                        left_idx = left_idx + 1;
-                        right_idx = right_idx + 1;
-                        acc.push(DiffResult::Identical { left: a, right: b });
-                    }
-                }
-                (Some(a), None) => {
-                    left_idx = left_idx + 1;
-                    acc.push(DiffResult::OnlyLeft { left: a });
+    for key in keys {
+        let el_a: Option<&A> = a.get(*key);
+        let el_b: Option<&A> = b.get(*key);
+
+        match (el_a, el_b) {
+            // both a and b have the key
+            (Some(v_a), Some(v_b)) => {
+                let dr: DiffResult<A> = v_a.diff(v_b);
+
+                if let DiffResult::Identical { .. } = dr {
+                } else {
                     has_differences = true;
                 }
-                (None, Some(b)) => {
-                    right_idx = right_idx + 1;
-                    acc.push(DiffResult::OnlyRight { right: b });
-                    has_differences = true;
-                }
-                (None, None) => {
-                    break;
-                }
+
+                acc.push(dr);
             }
-        }
 
-        if has_differences {
+            // only a has the key
+            (Some(v_a), None) => {
+                has_differences = true;
+                acc.push(DiffResult::OnlyLeft { left: v_a })
+            }
+
+            // only b has the key
+            (None, Some(v_b)) => {
+                has_differences = true;
+                acc.push(DiffResult::OnlyRight { right: v_b })
+            }
+
+            // none have the key (this shouldn't happen)
+            (None, None) => {}
+        }
+    }
+
+    (has_differences, acc)
+}
+
+/// Groups can be diffed.
+impl Diff for Group {
+    fn diff<'a>(&'a self, other: &'a Group) -> DiffResult<'a, Self> {
+        let (hd_groups, acc_groups) = diff_hashmap(&self.child_groups, &other.child_groups);
+        let (hd_entries, acc_entries) = diff_hashmap(&self.entries, &other.entries);
+
+        if hd_groups || hd_entries {
+            let mut inner_differences: Vec<Box<dyn DiffResultFormat>> = Vec::new();
+
+            for dr in acc_groups {
+                inner_differences.push(Box::new(dr));
+            }
+
+            for dr in acc_entries {
+                inner_differences.push(Box::new(dr));
+            }
+
             DiffResult::InnerDifferences {
                 left: self,
                 right: other,
-                inner_differences: acc,
+                inner_differences,
             }
         } else {
             DiffResult::Identical {
@@ -91,60 +125,5 @@ impl Diff for Group {
                 right: other,
             }
         }
-    }
-}
-
-/// Recursively add all entries from current_group and its children to the accumulated Vec
-fn check_group(
-    mut accumulated: &mut Vec<Entry>,
-    parents: &Vec<String>,
-    current_group: &keepass::Group,
-) -> Vec<Entry> {
-    // make new path containing current group name
-    let mut parents = parents.clone();
-    parents.push(current_group.name.to_owned());
-
-    // add all entries
-    for (_, entry) in &current_group.entries {
-        accumulated.push(Entry::from_keepass(&parents, &entry));
-    }
-
-    // recursively get all children
-    for (_, group) in &current_group.child_groups {
-        check_group(&mut accumulated, &parents, &group);
-    }
-    accumulated.clone()
-}
-
-impl<'a> DiffResultFormat for DiffResult<'a, Group, DiffResult<'a, Entry, ()>> {
-    fn diff_result_format(
-        &self,
-        mut f: &mut std::fmt::Formatter<'_>,
-        depth: usize,
-        use_color: bool,
-    ) -> std::fmt::Result {
-        let indent = "  ".repeat(depth);
-        match self {
-            DiffResult::Identical { .. } => write!(f, ""),
-            DiffResult::InnerDifferences {
-                inner_differences, ..
-            } => {
-                if use_color {
-                    crate::set_fg(Some(Color::Yellow));
-                }
-                write!(f, "{}~\n", indent)?;
-                for id in inner_differences {
-                    id.diff_result_format(&mut f, depth + 1, use_color)?;
-                }
-                write!(f, "\n")
-            }
-            _ => write!(f, "this should not happen"),
-        }?;
-
-        if use_color {
-            crate::set_fg(None);
-        }
-
-        Ok(())
     }
 }

@@ -179,7 +179,7 @@ pub fn kdbx_to_sorted_vec(
             );
             db
         })
-        .map(|db: Database| Group::from_keepass(db.root))
+        .map(|db: Database| Group::from_keepass(&db.root))
 }
 
 pub fn set_fg(color: Option<Color>) {
