@@ -74,11 +74,11 @@ where
                 if use_color {
                     crate::set_fg(Some(Color::Red));
                 }
-                write!(f, "{}- {}\n", indent, left)?;
+                write!(f, "- {}{}\n", indent, left)?;
                 if use_color {
                     crate::set_fg(Some(Color::Green));
                 }
-                write!(f, "{}+ {}\n", indent, right)
+                write!(f, "+ {}{}\n", indent, right)
             }
             DiffResult::InnerDifferences {
                 left,
@@ -88,7 +88,7 @@ where
                 if use_color {
                     crate::set_fg(Some(Color::Yellow));
                 }
-                write!(f, "{}~ {}\n", indent, left)?;
+                write!(f, "~ {}{}\n", indent, left)?;
                 for id in inner_differences {
                     id.diff_result_format(&mut f, depth + 1, use_color)?;
                 }
@@ -98,13 +98,13 @@ where
                 if use_color {
                     crate::set_fg(Some(Color::Red));
                 }
-                write!(f, "{}- {}\n", indent, left)
+                write!(f, "- {}{}\n", indent, left)
             }
             DiffResult::OnlyRight { right } => {
                 if use_color {
                     crate::set_fg(Some(Color::Green));
                 }
-                write!(f, "{}+ {}\n", indent, right)
+                write!(f, "+ {}{}\n", indent, right)
             }
         }?;
 
