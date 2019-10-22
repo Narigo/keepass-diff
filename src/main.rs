@@ -9,7 +9,6 @@ use clap::{App, Arg};
 use diff::{group::Group, Diff, DiffDisplay};
 use keepass::{result::Error, result::Result, Database};
 
-#[allow(unused_imports)]
 use termcolor::{Color, ColorChoice, ColorSpec, StandardStream, WriteColor};
 
 use std::path::Path;
@@ -141,10 +140,8 @@ fn main() -> Result<()> {
                 .or(matches.value_of("keyfiles"));
             let use_color: bool = !matches.is_present("no-color");
 
-            let db_a =
-                kdbx_to_group(file_a, pass_a, keyfile_a).expect("Error opening database A");
-            let db_b =
-                kdbx_to_group(file_b, pass_b, keyfile_b).expect("Error opening database B");
+            let db_a = kdbx_to_group(file_a, pass_a, keyfile_a).expect("Error opening database A");
+            let db_b = kdbx_to_group(file_b, pass_b, keyfile_b).expect("Error opening database B");
 
             let delta = db_a.diff(&db_b);
 
