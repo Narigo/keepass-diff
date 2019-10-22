@@ -142,7 +142,7 @@ fn main() -> Result<()> {
             let use_color: bool = !matches.is_present("no-color");
 
             let db_a =
-                kdbx_to_sorted_vec(file_a, pass_a, keyfile_a).expect("Error opening database A");
+                kdbx_to_group(file_a, pass_a, keyfile_a).expect("Error opening database A");
             let db_b =
                 kdbx_to_group(file_b, pass_b, keyfile_b).expect("Error opening database B");
 
@@ -163,7 +163,7 @@ fn main() -> Result<()> {
     Ok(())
 }
 
-pub fn kdbx_to_sorted_vec(
+pub fn kdbx_to_group(
     file: &str,
     password: Option<String>,
     keyfile_path: Option<&str>,
