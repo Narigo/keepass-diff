@@ -68,7 +68,7 @@ where
         use_color: bool,
     ) -> std::fmt::Result {
         let indent = "  ".repeat(depth);
-        match self {
+        let _ = match self {
             DiffResult::Identical { .. } => Ok(()),
             DiffResult::Changed { left, right } => {
                 if use_color {
@@ -106,7 +106,7 @@ where
                 }
                 write!(f, "+ {}{}\n", indent, right)
             }
-        }?;
+        };
 
         if use_color {
             crate::set_fg(None);
