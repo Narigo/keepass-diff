@@ -16,6 +16,18 @@
     fi
   }
 
+  test_gt() {
+    if [ "$2" -gt "$3" ]; then
+      echo "✅ $1"
+    else
+      echo "❌ $1"
+      echo "$2"
+      echo " is smaller or equal to "
+      echo "$3"
+      exit 1
+    fi
+  }
+
   echo "### Running equality tests, depending on order"
   echo "# Run a <diff> b"
   cargo run "$PWD/test/test.kdbx" "$PWD/test/test2.kdbx" --passwords demopass --no-color >"$PWD/target/test-result-01.txt"
@@ -33,6 +45,10 @@
   amount_of_plus_02=$(cat target/test-result-02.txt | grep '^+' | wc -l)
   amount_of_minus_02=$(cat target/test-result-02.txt | grep '^-' | wc -l)
   amount_of_tilde_02=$(cat target/test-result-02.txt | grep '^~' | wc -l)
+
+  test_gt "should output more than 0 plus lines" $amount_of_plus_01 0
+  test_gt "should output more than 0 minus lines" $amount_of_minus_01 0
+  test_gt "should output more than 0 tilde lines" $amount_of_tilde_01 0
 
   test_equal "first run should have same amount of tilde lines as second run" $amount_of_tilde_01 $amount_of_tilde_02
   test_equal "first run should have same amount of plus lines as second run has minus lines" $amount_of_plus_01 $amount_of_minus_02
