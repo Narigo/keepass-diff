@@ -47,21 +47,21 @@ impl StringStack {
         separator: &'static str,
         end: &'static str,
     ) -> String {
-        format!("{}{}", start, self.mk_string_helper(separator, end))
+        format!("{}{}", self.mk_string_helper(separator, start), end)
     }
 
-    fn mk_string_helper(&self, separator: &'static str, end: &'static str) -> String {
+    fn mk_string_helper(&self, separator: &'static str, start: &'static str) -> String {
         match self {
-            StringStack::Empty => format!("{}", end),
+            StringStack::Empty => format!("{}", start),
             StringStack::Cons(data, next) => {
                 let stack = next.as_ref();
                 match stack {
-                    StringStack::Empty => format!("{}{}", data, end),
+                    StringStack::Empty => format!("{}{}", start, data),
                     StringStack::Cons(_, _) => format!(
                         "{}{}{}",
-                        data,
+                        next.as_ref().mk_string_helper(separator, start),
                         separator,
-                        next.as_ref().mk_string_helper(separator, end)
+                        data,
                     ),
                 }
             }
@@ -74,7 +74,7 @@ mod test {
     use super::*;
 
     fn stack_abc() -> StringStack {
-        StringStack::empty().push("c").push("b").push("a")
+        StringStack::empty().push("a").push("b").push("c").push("d")
     }
 
     #[test]
@@ -87,12 +87,15 @@ mod test {
     #[test]
     fn shows_its_strings() {
         let stack = stack_abc();
-        assert_eq!("Stack(a, b, c)", format!("{}", stack.to_string()))
+        assert_eq!("Stack(a, b, c, d)", format!("{}", stack.to_string()))
     }
 
     #[test]
     fn mk_string_shows_correct() {
         let stack = stack_abc();
-        assert_eq!("a, b, c", format!("{}", stack.mk_string("", ", ", "")))
+        assert_eq!(
+            "[a, b, c, d]",
+            format!("{}", stack.mk_string("[", ", ", "]"))
+        )
     }
 }
