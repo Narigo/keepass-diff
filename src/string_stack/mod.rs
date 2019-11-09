@@ -3,10 +3,20 @@ use std::rc::Rc;
 #[derive(Debug, PartialEq)]
 pub enum StringStack {
     Empty,
-    Cons(&'static str, Rc<StringStack>),
+    Cons(String, Rc<StringStack>),
 }
 
 impl StringStack {
+    pub fn copy(&self) -> StringStack {
+        self.copy_helper(StringStack::empty())
+    }
+    fn copy_helper(&self, acc: StringStack) -> StringStack {
+        match self {
+            StringStack::Cons(a, next) => next.copy_helper(acc.push(a.to_string())),
+            StringStack::Empty => acc,
+        }
+    }
+
     pub fn empty() -> StringStack {
         StringStack::Empty
     }
@@ -16,18 +26,19 @@ impl StringStack {
             StringStack::Empty => true,
         }
     }
-    pub fn head(&self) -> Option<&'static str> {
+    pub fn head(&self) -> Option<String> {
         match self {
             StringStack::Empty => None,
-            StringStack::Cons(data, _) => Some(data),
+            StringStack::Cons(data, _) => Some(data.to_string()),
         }
     }
-    pub fn push(&self, data: &'static str) -> StringStack {
+    pub fn push(&self, data: String) -> StringStack {
         match self {
             StringStack::Empty => StringStack::Cons(data, Rc::new(StringStack::Empty)),
-            StringStack::Cons(b, next) => {
-                StringStack::Cons(data, Rc::new(StringStack::Cons(b, next.clone())))
-            }
+            StringStack::Cons(b, next) => StringStack::Cons(
+                data,
+                Rc::new(StringStack::Cons(b.to_string(), next.clone())),
+            ),
         }
     }
     pub fn tail(&self) -> Option<&StringStack> {
@@ -74,14 +85,18 @@ mod test {
     use super::*;
 
     fn stack_abc() -> StringStack {
-        StringStack::empty().push("a").push("b").push("c").push("d")
+        StringStack::empty()
+            .push("a".to_owned())
+            .push("b".to_owned())
+            .push("c".to_owned())
+            .push("d".to_owned())
     }
 
     #[test]
     fn sharing_with_immutable_cons_compiles() {
         let stack = stack_abc();
-        let _x = stack.push("100");
-        let _y = stack.push("200");
+        let _x = stack.push("100".to_owned());
+        let _y = stack.push("200".to_owned());
     }
 
     #[test]

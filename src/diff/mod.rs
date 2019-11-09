@@ -1,6 +1,8 @@
 use std::collections::{HashMap, HashSet};
 use termcolor::Color;
 
+use string_stack::StringStack;
+
 pub mod entry;
 pub mod field;
 pub mod group;
@@ -37,7 +39,7 @@ pub trait DiffResultFormat: std::fmt::Debug {
     fn diff_result_format(
         &self,
         f: &mut std::fmt::Formatter<'_>,
-        depth: usize,
+        path: StringStack,
         use_color: bool,
     ) -> std::fmt::Result;
 }
@@ -45,14 +47,14 @@ pub trait DiffResultFormat: std::fmt::Debug {
 /// Helper wrapper to impl Display for a DiffResult with user-specified settings
 pub struct DiffDisplay<T: DiffResultFormat> {
     pub inner: T,
-    pub depth: usize,
+    pub path: StringStack,
     pub use_color: bool,
 }
 
 impl<T: DiffResultFormat> std::fmt::Display for DiffDisplay<T> {
     fn fmt(&self, mut f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         self.inner
-            .diff_result_format(&mut f, self.depth, self.use_color)
+            .diff_result_format(&mut f, self.path.copy(), self.use_color)
     }
 }
 
@@ -64,21 +66,20 @@ where
     fn diff_result_format(
         &self,
         mut f: &mut std::fmt::Formatter<'_>,
-        depth: usize,
+        path: StringStack,
         use_color: bool,
     ) -> std::fmt::Result {
-        let indent = "  ".repeat(depth);
         let _ = match self {
             DiffResult::Identical { .. } => Ok(()),
             DiffResult::Changed { left, right } => {
                 if use_color {
                     crate::set_fg(Some(Color::Red));
                 }
-                write!(f, "- {}{}\n", indent, left)?;
+                write!(f, "- {}\n", path.push(format!("{}", left)).to_string())?;
                 if use_color {
                     crate::set_fg(Some(Color::Green));
                 }
-                write!(f, "+ {}{}\n", indent, right)
+                write!(f, "+ {}\n", path.push(format!("{}", right)).to_string())
             }
             DiffResult::InnerDifferences {
                 left,
@@ -88,9 +89,13 @@ where
                 if use_color {
                     crate::set_fg(Some(Color::Yellow));
                 }
-                write!(f, "~ {}{}\n", indent, left)?;
+                // write!(f, "~ {}{}\n", indent, left)?;
                 for id in inner_differences {
-                    id.diff_result_format(&mut f, depth + 1, use_color)?;
+                    id.diff_result_format(
+                        &mut f,
+                        path.push(format!("{}", left)),
+                        use_color,
+                    )?;
                 }
                 Ok(())
             }
@@ -98,13 +103,13 @@ where
                 if use_color {
                     crate::set_fg(Some(Color::Red));
                 }
-                write!(f, "- {}{}\n", indent, left)
+                write!(f, "- {}{}\n", path.to_string(), left)
             }
             DiffResult::OnlyRight { right } => {
                 if use_color {
                     crate::set_fg(Some(Color::Green));
                 }
-                write!(f, "+ {}{}\n", indent, right)
+                write!(f, "+ {}{}\n", path.to_string(), right)
             }
         };
 

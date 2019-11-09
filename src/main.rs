@@ -3,7 +3,8 @@ extern crate keepass;
 extern crate rpassword;
 extern crate termcolor;
 
-mod diff;
+pub mod diff;
+pub mod string_stack;
 
 use clap::{App, Arg};
 use diff::{group::Group, Diff, DiffDisplay};
@@ -149,7 +150,7 @@ fn main() -> Result<()> {
                 "{}",
                 DiffDisplay {
                     inner: delta,
-                    depth: 0,
+                    path: string_stack::StringStack::empty(),
                     use_color
                 }
             );
