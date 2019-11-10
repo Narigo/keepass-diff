@@ -75,11 +75,11 @@ where
                 if use_color {
                     crate::set_fg(Some(Color::Red));
                 }
-                write!(f, "- {}\n", path.push(format!("{}", left)).to_string())?;
+                write!(f, "- {}\n", path.push(format!("{}", left)).mk_string("[", " > ", "]"))?;
                 if use_color {
                     crate::set_fg(Some(Color::Green));
                 }
-                write!(f, "+ {}\n", path.push(format!("{}", right)).to_string())
+                write!(f, "+ {}\n", path.push(format!("{}", right)).mk_string("[", " > ", "]"))
             }
             DiffResult::InnerDifferences {
                 left,
@@ -103,13 +103,13 @@ where
                 if use_color {
                     crate::set_fg(Some(Color::Red));
                 }
-                write!(f, "- {}{}\n", path.to_string(), left)
+                write!(f, "- {}\n", path.push(format!("{}", left)).mk_string("[", " > ", "]"))
             }
             DiffResult::OnlyRight { right } => {
                 if use_color {
                     crate::set_fg(Some(Color::Green));
                 }
-                write!(f, "+ {}{}\n", path.to_string(), right)
+                write!(f, "+ {}\n", path.push(format!("{}", right)).mk_string("[", " > ", "]"))
             }
         };
 
