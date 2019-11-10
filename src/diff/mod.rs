@@ -41,6 +41,7 @@ pub trait DiffResultFormat: std::fmt::Debug {
         f: &mut std::fmt::Formatter<'_>,
         path: StringStack,
         use_color: bool,
+        use_verbose: bool,
     ) -> std::fmt::Result;
 }
 
@@ -49,12 +50,13 @@ pub struct DiffDisplay<T: DiffResultFormat> {
     pub inner: T,
     pub path: StringStack,
     pub use_color: bool,
+    pub use_verbose: bool,
 }
 
 impl<T: DiffResultFormat> std::fmt::Display for DiffDisplay<T> {
     fn fmt(&self, mut f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         self.inner
-            .diff_result_format(&mut f, self.path.copy(), self.use_color)
+            .diff_result_format(&mut f, self.path.copy(), self.use_color, self.use_verbose)
     }
 }
 
@@ -68,6 +70,7 @@ where
         mut f: &mut std::fmt::Formatter<'_>,
         path: StringStack,
         use_color: bool,
+        use_verbose: bool,
     ) -> std::fmt::Result {
         let _ = match self {
             DiffResult::Identical { .. } => Ok(()),
@@ -75,11 +78,29 @@ where
                 if use_color {
                     crate::set_fg(Some(Color::Red));
                 }
-                write!(f, "- {}\n", path.push(format!("{}", left)).mk_string("[", " > ", "]"))?;
+                if use_verbose {
+                    let indent = " ".repeat(path.len());
+                    write!(f, "- {}{}\n", indent, left)?;
+                } else {
+                    write!(
+                        f,
+                        "- {}\n",
+                        path.push(format!("{}", left)).mk_string("[", " > ", "]")
+                    )?;
+                }
                 if use_color {
                     crate::set_fg(Some(Color::Green));
                 }
-                write!(f, "+ {}\n", path.push(format!("{}", right)).mk_string("[", " > ", "]"))
+                if use_verbose {
+                    let indent = " ".repeat(path.len());
+                    write!(f, "+ {}{}\n", indent, right)
+                } else {
+                    write!(
+                        f,
+                        "+ {}\n",
+                        path.push(format!("{}", right)).mk_string("[", " > ", "]")
+                    )
+                }
             }
             DiffResult::InnerDifferences {
                 left,
@@ -89,12 +110,16 @@ where
                 if use_color {
                     crate::set_fg(Some(Color::Yellow));
                 }
-                // write!(f, "~ {}{}\n", indent, left)?;
+                if use_verbose {
+                    let indent = " ".repeat(path.len());
+                    write!(f, "~ {}{}\n", indent, left)?;
+                }
                 for id in inner_differences {
                     id.diff_result_format(
                         &mut f,
                         path.push(format!("{}", left)),
                         use_color,
+                        use_verbose,
                     )?;
                 }
                 Ok(())
@@ -103,13 +128,31 @@ where
                 if use_color {
                     crate::set_fg(Some(Color::Red));
                 }
-                write!(f, "- {}\n", path.push(format!("{}", left)).mk_string("[", " > ", "]"))
+                if use_verbose {
+                    let indent = " ".repeat(path.len());
+                    write!(f, "- {}{}\n", indent, left)
+                } else {
+                    write!(
+                        f,
+                        "- {}\n",
+                        path.push(format!("{}", left)).mk_string("[", " > ", "]")
+                    )
+                }
             }
             DiffResult::OnlyRight { right } => {
                 if use_color {
                     crate::set_fg(Some(Color::Green));
                 }
-                write!(f, "+ {}\n", path.push(format!("{}", right)).mk_string("[", " > ", "]"))
+                if use_verbose {
+                    let indent = " ".repeat(path.len());
+                    write!(f, "+ {}{}\n", indent, right)
+                } else {
+                    write!(
+                        f,
+                        "+ {}\n",
+                        path.push(format!("{}", right)).mk_string("[", " > ", "]")
+                    )
+                }
             }
         };
 

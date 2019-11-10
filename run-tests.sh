@@ -30,9 +30,9 @@
 
   echo "### Running equality tests, depending on order"
   echo "# Run a <diff> b"
-  cargo run "$PWD/test/test.kdbx" "$PWD/test/test2.kdbx" --passwords demopass --no-color >"$PWD/target/test-result-01.txt"
+  cargo run "$PWD/test/test.kdbx" "$PWD/test/test2.kdbx" --passwords demopass --no-color --verbose >"$PWD/target/test-result-01.txt"
   echo "# Run b <diff> a"
-  cargo run "$PWD/test/test2.kdbx" "$PWD/test/test.kdbx" --passwords demopass --no-color >"$PWD/target/test-result-02.txt"
+  cargo run "$PWD/test/test2.kdbx" "$PWD/test/test.kdbx" --passwords demopass --no-color --verbose >"$PWD/target/test-result-02.txt"
 
   lines_of_run_01=$(cat target/test-result-01.txt | wc -l)
   lines_of_run_02=$(cat target/test-result-02.txt | wc -l)

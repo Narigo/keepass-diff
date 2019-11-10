@@ -40,6 +40,13 @@ fn main() -> Result<()> {
         .takes_value(false),
     )
     .arg(
+      Arg::with_name("verbose")
+        .short("v")
+        .long("verbose")
+        .help("Enables verbose output")
+        .takes_value(false),
+    )
+    .arg(
       Arg::with_name("password-a")
         .long("password-a")
         .help("Sets the password for the first file (will be asked for if omitted)")
@@ -140,6 +147,7 @@ fn main() -> Result<()> {
                 .value_of("keyfile-b")
                 .or(matches.value_of("keyfiles"));
             let use_color: bool = !matches.is_present("no-color");
+            let use_verbose: bool = matches.is_present("verbose");
 
             let db_a = kdbx_to_group(file_a, pass_a, keyfile_a).expect("Error opening database A");
             let db_b = kdbx_to_group(file_b, pass_b, keyfile_b).expect("Error opening database B");
@@ -151,7 +159,8 @@ fn main() -> Result<()> {
                 DiffDisplay {
                     inner: delta,
                     path: string_stack::StringStack::empty(),
-                    use_color
+                    use_color,
+                    use_verbose
                 }
             );
         }

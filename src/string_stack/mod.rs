@@ -32,6 +32,12 @@ impl StringStack {
             StringStack::Cons(data, _) => Some(data.to_string()),
         }
     }
+    pub fn len(&self) -> usize {
+        match self {
+            StringStack::Empty => 0,
+            StringStack::Cons(_, tail) => 1 + tail.len(),
+        }
+    }
     pub fn push(&self, data: String) -> StringStack {
         match self {
             StringStack::Empty => StringStack::Cons(data, Rc::new(StringStack::Empty)),
