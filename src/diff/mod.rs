@@ -85,7 +85,7 @@ where
                     write!(
                         f,
                         "- {}\n",
-                        path.push(format!("{}", left)).mk_string("[", " > ", "]")
+                        path.push(format!("{}", left)).mk_string("[", ", ", "]")
                     )?;
                 }
                 if use_color {
@@ -98,7 +98,7 @@ where
                     write!(
                         f,
                         "+ {}\n",
-                        path.push(format!("{}", right)).mk_string("[", " > ", "]")
+                        path.push(format!("{}", right)).mk_string("[", ", ", "]")
                     )
                 }
             }
@@ -135,7 +135,7 @@ where
                     write!(
                         f,
                         "- {}\n",
-                        path.push(format!("{}", left)).mk_string("[", " > ", "]")
+                        path.push(format!("{}", left)).mk_string("[", ", ", "]")
                     )
                 }
             }
@@ -150,7 +150,7 @@ where
                     write!(
                         f,
                         "+ {}\n",
-                        path.push(format!("{}", right)).mk_string("[", " > ", "]")
+                        path.push(format!("{}", right)).mk_string("[", ", ", "]")
                     )
                 }
             }

@@ -9,34 +9,40 @@ pub struct Group {
     name: String,
     child_groups: HashMap<String, Group>,
     entries: HashMap<String, Entry>,
+    use_verbose: bool,
 }
 
 impl Group {
     /// Create an entries list from a keepass::Group
-    pub fn from_keepass(group: &keepass::Group) -> Self {
+    pub fn from_keepass(group: &keepass::Group, use_verbose: bool) -> Self {
         let child_groups = group
             .child_groups
             .iter()
-            .map(|(k, v)| (k.clone(), Group::from_keepass(&v)))
+            .map(|(k, v)| (k.clone(), Group::from_keepass(&v, use_verbose)))
             .collect();
 
         let entries = group
             .entries
             .iter()
-            .map(|(k, v)| (k.clone(), Entry::from_keepass(&v)))
+            .map(|(k, v)| (k.clone(), Entry::from_keepass(&v, use_verbose)))
             .collect();
 
         Group {
             name: group.name.to_owned(),
             child_groups,
             entries,
+            use_verbose,
         }
     }
 }
 
 impl std::fmt::Display for Group {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "Group '{}'", self.name)
+        if self.use_verbose {
+            write!(f, "Group '{}'", self.name)
+        } else {
+            write!(f, "{}", self.name)
+        }
     }
 }
 

@@ -4,6 +4,7 @@ use crate::diff::{Diff, DiffResult};
 pub struct Field {
     pub name: String,
     pub value: String,
+    pub use_verbose: bool,
 }
 
 impl Diff for Field {
@@ -24,6 +25,10 @@ impl Diff for Field {
 
 impl std::fmt::Display for Field {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        write!(f, "Field '{}' = '{}'", self.name, self.value)
+        if self.use_verbose {
+            write!(f, "Field '{}' = '{}'", self.name, self.value)
+        } else {
+            write!(f, "{} = {}", self.name, self.value)
+        }
     }
 }

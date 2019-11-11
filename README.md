@@ -22,15 +22,15 @@ The CLI will ask for the password for both files individually.
 
 ### Providing passwords
 
-You can also provide one or both passwords on the command line (please be aware that this will expose them to other
-users logged on to the system):
+You can also provide one or both passwords on the command line (please be aware
+that this will expose them to other users logged on to the system):
 
 ```
 keepass-diff <file-a> <file-b> --password-a <password-a> --password-b <password-b>
 ```
 
-If the files have the same password, you can use the `--passwords <password>` flag. Be aware this has the same problem
-as above:
+If the files have the same password, you can use the `--passwords <password>`
+flag. Be aware this has the same problem as above:
 
 ```
 keepass-diff <file-a> <file-b> --passwords <password>
@@ -42,13 +42,14 @@ keepass-diff <file-a> <file-b> --passwords <password>
 keepass-diff <file-a> <file-b> --keyfile-a <keyfile-a> --keyfile-b <keyfile-b>
 ```
 
-If one of these flags is provided, it will use the keyfile for authentication. It will still ask for a password, if the
-password flags are not provided.
+If one of these flags is provided, it will use the keyfile for authentication.
+It will still ask for a password, if the password flags are not provided.
 
 ### Disabling color output for scripts
 
-If you want to pipe the output of the command into another file or script, you may want to disable the terminal colors.
-You can do so with the `--no-color` or `-C` flag.
+If you want to pipe the output of the command into another file or script, you
+may want to disable the terminal colors. You can do so with the `--no-color` or
+`-C` flag.
 
 `--help` yields:
 
@@ -63,6 +64,7 @@ FLAGS:
         --no-password-b    Sets no password for the second file (and will not ask for it)
         --no-passwords     Sets no password for both files (and will not ask for both files)
     -V, --version          Prints version information
+    -v, --verbose          Enables verbose output
 
 OPTIONS:
         --keyfile-a <keyfile-a>      Sets the key file for the first file
@@ -89,9 +91,13 @@ ARGS:
 
 Password for the Keepass demo files: `demopass`.
 
-`test_file.kdbx` is locked without password and keyfile `keyfile.key`. `test2_file.kdbx` is locked with `demopass` and
-the keyfile `keyfile.key`.
+`test_file.kdbx` is locked without password and keyfile `keyfile.key`.
+`test2_file.kdbx` is locked with `demopass` and the keyfile `keyfile.key`.
+
+A small bash script for running tests is `run-tests.sh`. It will run a few tests
+to see if the outputs is correct.
 
 ## Contributing
 
-Care to help? I'm pretty new to Rust, so if anyone likes to help or teach me cool stuff, please reach out!
+Care to help? I'm pretty new to Rust, so if anyone likes to help or teach me
+cool stuff, please reach out!

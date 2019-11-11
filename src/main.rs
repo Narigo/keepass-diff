@@ -149,8 +149,10 @@ fn main() -> Result<()> {
             let use_color: bool = !matches.is_present("no-color");
             let use_verbose: bool = matches.is_present("verbose");
 
-            let db_a = kdbx_to_group(file_a, pass_a, keyfile_a).expect("Error opening database A");
-            let db_b = kdbx_to_group(file_b, pass_b, keyfile_b).expect("Error opening database B");
+            let db_a = kdbx_to_group(file_a, pass_a, keyfile_a, use_verbose)
+                .expect("Error opening database A");
+            let db_b = kdbx_to_group(file_b, pass_b, keyfile_b, use_verbose)
+                .expect("Error opening database B");
 
             let delta = db_a.diff(&db_b);
 
@@ -174,6 +176,7 @@ pub fn kdbx_to_group(
     file: &str,
     password: Option<String>,
     keyfile_path: Option<&str>,
+    use_verbose: bool,
 ) -> Result<Group> {
     let mut keyfile = keyfile_path.map(|path| File::open(Path::new(path)).unwrap());
     File::open(Path::new(file))
@@ -186,7 +189,7 @@ pub fn kdbx_to_group(
             );
             db
         })
-        .map(|db: Database| Group::from_keepass(&db.root))
+        .map(|db: Database| Group::from_keepass(&db.root, use_verbose))
 }
 
 pub fn set_fg(color: Option<Color>) {
