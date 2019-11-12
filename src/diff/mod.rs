@@ -79,7 +79,7 @@ where
                     crate::set_fg(Some(Color::Red));
                 }
                 if use_verbose {
-                    let indent = " ".repeat(path.len());
+                    let indent = "  ".repeat(path.len());
                     write!(f, "- {}{}\n", indent, left)?;
                 } else {
                     write!(
@@ -92,7 +92,7 @@ where
                     crate::set_fg(Some(Color::Green));
                 }
                 if use_verbose {
-                    let indent = " ".repeat(path.len());
+                    let indent = "  ".repeat(path.len());
                     write!(f, "+ {}{}\n", indent, right)
                 } else {
                     write!(
@@ -111,7 +111,7 @@ where
                     crate::set_fg(Some(Color::Yellow));
                 }
                 if use_verbose {
-                    let indent = " ".repeat(path.len());
+                    let indent = "  ".repeat(path.len());
                     write!(f, "~ {}{}\n", indent, left)?;
                 }
                 for id in inner_differences {
@@ -129,7 +129,7 @@ where
                     crate::set_fg(Some(Color::Red));
                 }
                 if use_verbose {
-                    let indent = " ".repeat(path.len());
+                    let indent = "  ".repeat(path.len());
                     write!(f, "- {}{}\n", indent, left)
                 } else {
                     write!(
@@ -144,7 +144,7 @@ where
                     crate::set_fg(Some(Color::Green));
                 }
                 if use_verbose {
-                    let indent = " ".repeat(path.len());
+                    let indent = "  ".repeat(path.len());
                     write!(f, "+ {}{}\n", indent, right)
                 } else {
                     write!(
