@@ -58,22 +58,23 @@
 <p>The CLI will ask for the password for both files individually.</p>
 <p><img src="screencast.gif" alt="Example Screencast" /></p>
 <h3 id="providing-passwords">Providing passwords</h3></h3>
-<p>You can also provide one or both passwords on the command line (please be aware that this will expose them to other
-users logged on to the system):</p>
+<p>You can also provide one or both passwords on the command line (please be aware
+that this will expose them to other users logged on to the system):</p>
 <pre><code>keepass-diff &lt;file-a&gt; &lt;file-b&gt; --password-a &lt;password-a&gt; --password-b &lt;password-b&gt;
 </code></pre>
-<p>If the files have the same password, you can use the <code>--passwords &lt;password&gt;</code> flag. Be aware this has the same problem
-as above:</p>
+<p>If the files have the same password, you can use the <code>--passwords &lt;password&gt;</code>
+flag. Be aware this has the same problem as above:</p>
 <pre><code>keepass-diff &lt;file-a&gt; &lt;file-b&gt; --passwords &lt;password&gt;
 </code></pre>
 <h3 id="providing-keyfiles">Providing keyfiles</h3></h3>
 <pre><code>keepass-diff &lt;file-a&gt; &lt;file-b&gt; --keyfile-a &lt;keyfile-a&gt; --keyfile-b &lt;keyfile-b&gt;
 </code></pre>
-<p>If one of these flags is provided, it will use the keyfile for authentication. It will still ask for a password, if the
-password flags are not provided.</p>
+<p>If one of these flags is provided, it will use the keyfile for authentication.
+It will still ask for a password, if the password flags are not provided.</p>
 <h3 id="disabling-color-output-for-scripts">Disabling color output for scripts</h3></h3>
-<p>If you want to pipe the output of the command into another file or script, you may want to disable the terminal colors.
-You can do so with the <code>--no-color</code> or <code>-C</code> flag.</p>
+<p>If you want to pipe the output of the command into another file or script, you
+may want to disable the terminal colors. You can do so with the <code>--no-color</code> or
+<code>-C</code> flag.</p>
 <p><code>--help</code> yields:</p>
 <pre><code>USAGE:
     keepass-diff [FLAGS] [OPTIONS] &lt;INPUT-A&gt; &lt;INPUT-B&gt;
@@ -85,6 +86,7 @@ FLAGS:
         --no-password-b    Sets no password for the second file (and will not ask for it)
         --no-passwords     Sets no password for both files (and will not ask for both files)
     -V, --version          Prints version information
+    -v, --verbose          Enables verbose output
 
 OPTIONS:
         --keyfile-a &lt;keyfile-a&gt;      Sets the key file for the first file
@@ -108,10 +110,13 @@ ARGS:
 </ul>
 <h2 id="testing">Testing</h2></h2>
 <p>Password for the Keepass demo files: <code>demopass</code>.</p>
-<p><code>test_file.kdbx</code> is locked without password and keyfile <code>keyfile.key</code>. <code>test2_file.kdbx</code> is locked with <code>demopass</code> and
-the keyfile <code>keyfile.key</code>.</p>
+<p><code>test_file.kdbx</code> is locked without password and keyfile <code>keyfile.key</code>.
+<code>test2_file.kdbx</code> is locked with <code>demopass</code> and the keyfile <code>keyfile.key</code>.</p>
+<p>A small bash script for running tests is <code>run-tests.sh</code>. It will run a few tests
+to see if the outputs is correct.</p>
 <h2 id="contributing">Contributing</h2></h2>
-<p>Care to help? I'm pretty new to Rust, so if anyone likes to help or teach me cool stuff, please reach out!</p>
+<p>Care to help? I'm pretty new to Rust, so if anyone likes to help or teach me
+cool stuff, please reach out!</p>
 
     </div>
   </body>

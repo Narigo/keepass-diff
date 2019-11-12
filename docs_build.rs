@@ -13,9 +13,9 @@ extern crate heck;
 extern crate pulldown_cmark;
 
 use std::fs::File;
-use std::io::{BufReader, BufWriter};
+use std::io::{BufReader};
 use std::io::prelude::*;
-use pulldown_cmark::{Parser, Options, Event, Tag, CowStr, InlineStr, html};
+use pulldown_cmark::{Parser, Options, Event, Tag, CowStr, html};
 use heck::KebabCase;
 
 fn main() -> std::io::Result<()> {
