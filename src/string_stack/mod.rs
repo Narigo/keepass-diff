@@ -90,7 +90,7 @@ impl StringStack {
 mod test {
     use super::*;
 
-    fn stack_abc() -> StringStack {
+    fn stack_abcd() -> StringStack {
         StringStack::empty()
             .push("a".to_owned())
             .push("b".to_owned())
@@ -100,20 +100,20 @@ mod test {
 
     #[test]
     fn sharing_with_immutable_cons_compiles() {
-        let stack = stack_abc();
+        let stack = stack_abcd();
         let _x = stack.push("100".to_owned());
         let _y = stack.push("200".to_owned());
     }
 
     #[test]
     fn shows_its_strings() {
-        let stack = stack_abc();
+        let stack = stack_abcd();
         assert_eq!("Stack(a, b, c, d)", format!("{}", stack.to_string()))
     }
 
     #[test]
     fn mk_string_shows_correct() {
-        let stack = stack_abc();
+        let stack = stack_abcd();
         assert_eq!(
             "[a, b, c, d]",
             format!("{}", stack.mk_string("[", ", ", "]"))
