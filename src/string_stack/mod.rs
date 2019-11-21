@@ -2,21 +2,11 @@ use std::rc::Rc;
 
 #[derive(Debug, PartialEq)]
 pub enum StringStack {
-    Empty,
     Cons(String, Rc<StringStack>),
+    Empty,
 }
 
 impl StringStack {
-    pub fn copy(&self) -> StringStack {
-        self.copy_helper(StringStack::empty())
-    }
-    fn copy_helper(&self, acc: StringStack) -> StringStack {
-        match self {
-            StringStack::Cons(a, next) => next.copy_helper(acc.push(a.to_string())),
-            StringStack::Empty => acc,
-        }
-    }
-
     pub fn empty() -> StringStack {
         StringStack::Empty
     }
@@ -43,7 +33,7 @@ impl StringStack {
             StringStack::Empty => StringStack::Cons(data, Rc::new(StringStack::Empty)),
             StringStack::Cons(b, next) => StringStack::Cons(
                 data,
-                Rc::new(StringStack::Cons(b.to_string(), next.clone())),
+                Rc::new(StringStack::Cons(b.to_string(), Rc::clone(&next))),
             ),
         }
     }
