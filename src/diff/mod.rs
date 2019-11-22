@@ -39,7 +39,7 @@ pub trait DiffResultFormat: std::fmt::Debug {
     fn diff_result_format(
         &self,
         f: &mut std::fmt::Formatter<'_>,
-        path: StringStack,
+        path: &StringStack,
         use_color: bool,
         use_verbose: bool,
     ) -> std::fmt::Result;
@@ -56,7 +56,7 @@ pub struct DiffDisplay<T: DiffResultFormat> {
 impl<T: DiffResultFormat> std::fmt::Display for DiffDisplay<T> {
     fn fmt(&self, mut f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         self.inner
-            .diff_result_format(&mut f, self.path.copy(), self.use_color, self.use_verbose)
+            .diff_result_format(&mut f, &self.path, self.use_color, self.use_verbose)
     }
 }
 
@@ -68,7 +68,7 @@ where
     fn diff_result_format(
         &self,
         mut f: &mut std::fmt::Formatter<'_>,
-        path: StringStack,
+        path: &StringStack,
         use_color: bool,
         use_verbose: bool,
     ) -> std::fmt::Result {
@@ -117,7 +117,7 @@ where
                 for id in inner_differences {
                     id.diff_result_format(
                         &mut f,
-                        path.push(format!("{}", left)),
+                        &path.push(format!("{}", left)),
                         use_color,
                         use_verbose,
                     )?;
