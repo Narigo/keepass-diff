@@ -30,11 +30,10 @@ impl StringStack {
     }
     pub fn push(&self, data: String) -> StringStack {
         match self {
+            StringStack::Cons(h, t) => {
+                StringStack::Cons(data, Rc::new(StringStack::Cons(h.clone(), Rc::clone(t))))
+            }
             StringStack::Empty => StringStack::Cons(data, Rc::new(StringStack::Empty)),
-            StringStack::Cons(b, next) => StringStack::Cons(
-                data,
-                Rc::new(StringStack::Cons(b.to_string(), Rc::clone(&next))),
-            ),
         }
     }
     pub fn tail(&self) -> Option<&StringStack> {
