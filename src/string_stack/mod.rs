@@ -18,14 +18,14 @@ impl StringStack {
     }
     pub fn head(&self) -> Option<String> {
         match self {
-            StringStack::Empty => None,
             StringStack::Cons(data, _) => Some(data.to_string()),
+            StringStack::Empty => None,
         }
     }
     pub fn len(&self) -> usize {
         match self {
-            StringStack::Empty => 0,
             StringStack::Cons(_, tail) => 1 + tail.len(),
+            StringStack::Empty => 0,
         }
     }
     pub fn push(&self, data: String) -> StringStack {
@@ -38,8 +38,8 @@ impl StringStack {
     }
     pub fn tail(&self) -> Option<&StringStack> {
         match self {
-            StringStack::Empty => None,
             StringStack::Cons(_, next) => Some(next.as_ref()),
+            StringStack::Empty => None,
         }
     }
 
@@ -58,7 +58,6 @@ impl StringStack {
 
     fn mk_string_helper(&self, separator: &'static str, start: &'static str) -> String {
         match self {
-            StringStack::Empty => format!("{}", start),
             StringStack::Cons(data, next) => {
                 let stack = next.as_ref();
                 match stack {
@@ -71,6 +70,7 @@ impl StringStack {
                     ),
                 }
             }
+            StringStack::Empty => format!("{}", start),
         }
     }
 }
