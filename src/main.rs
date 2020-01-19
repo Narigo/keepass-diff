@@ -4,7 +4,7 @@ extern crate rpassword;
 extern crate termcolor;
 
 pub mod diff;
-pub mod string_stack;
+pub mod stack;
 
 use clap::{App, Arg};
 use diff::{group::Group, Diff, DiffDisplay};
@@ -160,7 +160,7 @@ fn main() -> Result<()> {
                 "{}",
                 DiffDisplay {
                     inner: delta,
-                    path: string_stack::StringStack::empty(),
+                    path: stack::Stack::empty(),
                     use_color,
                     use_verbose
                 }
