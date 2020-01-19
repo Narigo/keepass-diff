@@ -1,7 +1,7 @@
 use std::collections::{HashMap, HashSet};
 use termcolor::Color;
 
-use string_stack::StringStack;
+use stack::Stack;
 
 pub mod entry;
 pub mod field;
@@ -39,21 +39,21 @@ pub trait DiffResultFormat: std::fmt::Debug {
     fn diff_result_format(
         &self,
         f: &mut std::fmt::Formatter<'_>,
-        path: &StringStack,
+        path: &Stack<&String>,
         use_color: bool,
         use_verbose: bool,
     ) -> std::fmt::Result;
 }
 
 /// Helper wrapper to impl Display for a DiffResult with user-specified settings
-pub struct DiffDisplay<T: DiffResultFormat> {
+pub struct DiffDisplay<'a, T: DiffResultFormat> {
     pub inner: T,
-    pub path: StringStack,
+    pub path: Stack<&'a String>,
     pub use_color: bool,
     pub use_verbose: bool,
 }
 
-impl<T: DiffResultFormat> std::fmt::Display for DiffDisplay<T> {
+impl<'a, T: DiffResultFormat> std::fmt::Display for DiffDisplay<'a, T> {
     fn fmt(&self, mut f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         self.inner
             .diff_result_format(&mut f, &self.path, self.use_color, self.use_verbose)
@@ -68,7 +68,7 @@ where
     fn diff_result_format(
         &self,
         mut f: &mut std::fmt::Formatter<'_>,
-        path: &StringStack,
+        path: &Stack<&String>,
         use_color: bool,
         use_verbose: bool,
     ) -> std::fmt::Result {
@@ -85,7 +85,7 @@ where
                     write!(
                         f,
                         "- {}\n",
-                        path.push(format!("{}", left)).mk_string("[", ", ", "]")
+                        path.append(&format!("{}", left)).mk_string("[", ", ", "]")
                     )?;
                 }
                 if use_color {
@@ -98,7 +98,7 @@ where
                     write!(
                         f,
                         "+ {}\n",
-                        path.push(format!("{}", right)).mk_string("[", ", ", "]")
+                        path.append(&format!("{}", right)).mk_string("[", ", ", "]")
                     )
                 }
             }
@@ -117,7 +117,7 @@ where
                 for id in inner_differences {
                     id.diff_result_format(
                         &mut f,
-                        &path.push(format!("{}", left)),
+                        &path.append(&format!("{}", left)),
                         use_color,
                         use_verbose,
                     )?;
@@ -135,7 +135,7 @@ where
                     write!(
                         f,
                         "- {}\n",
-                        path.push(format!("{}", left)).mk_string("[", ", ", "]")
+                        path.append(&format!("{}", left)).mk_string("[", ", ", "]")
                     )
                 }
             }
@@ -150,7 +150,7 @@ where
                     write!(
                         f,
                         "+ {}\n",
-                        path.push(format!("{}", right)).mk_string("[", ", ", "]")
+                        path.append(&format!("{}", right)).mk_string("[", ", ", "]")
                     )
                 }
             }
