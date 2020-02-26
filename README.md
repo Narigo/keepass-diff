@@ -97,6 +97,12 @@ Password for the Keepass demo files: `demopass`.
 A small bash script for running tests is `run-tests.sh`. It will run a few tests
 to see if the outputs is correct.
 
+## Docker
+
+Using the Makefile, you can build, run and test `keepass-diff` with Docker (without using rust toolchain on the host).
+
+For that, it binds the `/home/${USER}` on the container using an alias that you can add to your `~/.bahrc`.
+
 ## Contributing
 
 Care to help? I'm pretty new to Rust, so if anyone likes to help or teach me
