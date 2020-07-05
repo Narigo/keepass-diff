@@ -7,8 +7,11 @@ This CLI-tool diffs two Keepass (.kdbx) files and prints their differences.
 ## Installation
 
 ```
-cargo install keepass-diff
+RUSTFLAGS="-C target-cpu=native" cargo install keepass-diff
 ```
+
+The `RUSTFLAGS` variable will significantly boost performance. See
+[installation note in keepass-rs](https://github.com/sseemayer/keepass-rs#installation).
 
 ## Usage
 
@@ -95,7 +98,8 @@ Password for the Keepass demo files: `demopass`.
 `test2_file.kdbx` is locked with `demopass` and the keyfile `keyfile.key`.
 
 A small bash script for running tests is `run-tests.sh`. It will run a few tests
-to see if the outputs is correct.
+to see if the outputs is correct. Best run as
+`RUSTFLAGS="-C target-cpu=native" ./run-tests.sh` for improved performance.
 
 ## Contributing
 
