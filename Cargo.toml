@@ -5,7 +5,7 @@ keywords = ["cli", "diff", "keepass"]
 repository = "https://github.com/Narigo/keepass-diff"
 license = "MIT"
 readme = "README.md"
-version = "1.0.0"
+version = "1.0.1"
 authors = ["Joern Bernhardt <joern.bernhardt@googlemail.com>"]
 
 # See https://crates.io/category_slugs
