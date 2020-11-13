@@ -17,7 +17,7 @@ use std::{fs::File, io::Read};
 
 fn main() -> Result<()> {
     let matches = App::new("keepass-diff")
-    .version("1.0.0")
+    .version("1.0.1")
     .about("Shows differences between two .kdbx files")
     .author("Joern Bernhardt")
     .arg(
