@@ -82,9 +82,9 @@
 
   echo "### Running test to open KDBX 3.1 files"
   echo "# Run a <diff> b"
-  cargo run "$PWD/test/issue-24-kdbx-3.1/Test1.kdbx" "$PWD/test/issue-24-kdbx-3.1/Test2.kdbx" --password-a Test1 --password-b Test2 --no-color >"$PWD/target/test-result-05.txt"
+  cargo run --release "$PWD/test/issue-24-kdbx-3.1/Test1.kdbx" "$PWD/test/issue-24-kdbx-3.1/Test2.kdbx" --password-a Test1 --password-b Test2 --no-color >"$PWD/target/test-result-05.txt"
   echo "# Run b <diff> a"
-  cargo run "$PWD/test/issue-24-kdbx-3.1/Test2.kdbx" "$PWD/test/issue-24-kdbx-3.1/Test1.kdbx" --password-a Test2 --password-b Test1 --no-color >"$PWD/target/test-result-06.txt"
+  cargo run --release "$PWD/test/issue-24-kdbx-3.1/Test2.kdbx" "$PWD/test/issue-24-kdbx-3.1/Test1.kdbx" --password-a Test2 --password-b Test1 --no-color >"$PWD/target/test-result-06.txt"
 
   lines_of_run_05=$(cat target/test-result-05.txt | wc -l)
   lines_of_run_06=$(cat target/test-result-06.txt | wc -l)
