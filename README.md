@@ -39,6 +39,13 @@ flag. Be aware this has the same problem as above:
 keepass-diff <file-a> <file-b> --passwords <password>
 ```
 
+To avoid exposing the password, use `--same-password` instead. The CLI will ask
+you to type it once for both files.
+
+```
+keepass-diff <file-a> <file-b> --same-password
+```
+
 ### Providing keyfiles
 
 ```

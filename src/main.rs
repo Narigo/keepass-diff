@@ -17,7 +17,7 @@ use std::{fs::File, io::Read};
 
 fn main() -> Result<()> {
     let matches = App::new("keepass-diff")
-    .version("1.0.1")
+    .version("1.1.0")
     .about("Shows differences between two .kdbx files")
     .author("Joern Bernhardt")
     .arg(
@@ -65,6 +65,12 @@ fn main() -> Result<()> {
         .takes_value(true),
     )
     .arg(
+      Arg::with_name("same-password")
+        .long("same-password")
+        .help("Asks for password only once, and tries to open both files with it")
+        .takes_value(false),
+    )
+    .arg(
       Arg::with_name("no-password-a")
         .long("no-password-a")
         .help("Sets no password for the first file (and will not ask for it)")
@@ -107,38 +113,30 @@ fn main() -> Result<()> {
             let pass_a = match (
                 matches.value_of("password-a"),
                 matches.value_of("passwords"),
+                matches.is_present("same-password"),
                 matches.is_present("no-password-a"),
                 matches.is_present("no-passwords"),
             ) {
-                (Some(password), _, _, _) => Some(String::from(password)),
-                (_, Some(password), _, _) => Some(String::from(password)),
-                (_, _, true, _) => None,
-                (_, _, _, true) => None,
-                _ => {
-                    print!("Password for file {}: ", file_a);
-                    let password = rpassword::prompt_password_stdout("")
-                        .map(|s| if s == "" { None } else { Some(s) })
-                        .unwrap_or(None);
-                    password
-                }
+                (Some(password), _, _, _, _) => Some(String::from(password)),
+                (_, Some(password), _, _, _) => Some(String::from(password)),
+                (_, _, true, _, _) => prompt_password("Password for both files: "),
+                (_, _, _, true, _) => None,
+                (_, _, _, _, true) => None,
+                _ => prompt_password(format!("Password for file {}: ", file_a).as_str()),
             };
             let pass_b = match (
                 matches.value_of("password-b"),
                 matches.value_of("passwords"),
+                matches.is_present("same-password"),
                 matches.is_present("no-password-b"),
                 matches.is_present("no-passwords"),
             ) {
-                (Some(password), _, _, _) => Some(String::from(password)),
-                (_, Some(password), _, _) => Some(String::from(password)),
-                (_, _, true, _) => None,
-                (_, _, _, true) => None,
-                _ => {
-                    print!("Password for file {}: ", file_b);
-                    let password_option: Option<String> = rpassword::prompt_password_stdout("")
-                        .map(|s| if s == "" { None } else { Some(s) })
-                        .unwrap_or(None);
-                    password_option
-                }
+                (Some(password), _, _, _, _) => Some(String::from(password)),
+                (_, Some(password), _, _, _) => Some(String::from(password)),
+                (_, _, true, _, _) => pass_a.clone(),
+                (_, _, _, true, _) => None,
+                (_, _, _, _, true) => None,
+                _ => prompt_password(format!("Password for file {}: ", file_b).as_str()),
             };
             let keyfile_a: Option<&str> = matches
                 .value_of("keyfile-a")
@@ -170,6 +168,12 @@ fn main() -> Result<()> {
     }
 
     Ok(())
+}
+
+fn prompt_password(prompt: &str) -> Option<String> {
+    rpassword::prompt_password_stdout(prompt)
+        .map(|s| if s == "" { None } else { Some(s) })
+        .unwrap_or(None)
 }
 
 pub fn kdbx_to_group(
