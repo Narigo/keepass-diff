@@ -22,6 +22,7 @@ impl Entry {
                     Field {
                         name: k.to_owned(),
                         value: match v {
+                            Value::Bytes(bytes) => String::from_utf8(bytes.to_vec()).unwrap(),
                             Value::Unprotected(v) => v.to_owned(),
                             Value::Protected(p) => String::from_utf8(p.unsecure().to_owned())
                                 .unwrap()
