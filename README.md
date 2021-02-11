@@ -73,6 +73,7 @@ FLAGS:
         --no-password-a    Sets no password for the first file (and will not ask for it)
         --no-password-b    Sets no password for the second file (and will not ask for it)
         --no-passwords     Sets no password for both files (and will not ask for both files)
+        --same-password    Asks for password only once, and tries to open both files with it
     -V, --version          Prints version information
     -v, --verbose          Enables verbose output
 
