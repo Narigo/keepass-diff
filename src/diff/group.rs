@@ -35,9 +35,6 @@ impl Group {
             })
             .collect();
 
-        println!("child_groups: {:?}", child_groups);
-        println!("entries: {:?}", entries);
-
         Group {
             name,
             child_groups,
