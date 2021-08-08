@@ -1,6 +1,7 @@
 use crate::diff::entry::Entry;
 use crate::diff::{Diff, DiffResult, DiffResultFormat};
 
+use keepass::Node;
 use std::collections::HashMap;
 
 /// Corresponds to a sorted Vec of KdbxEntry objects that can be diffed
@@ -15,20 +16,30 @@ pub struct Group {
 impl Group {
     /// Create an entries list from a keepass::Group
     pub fn from_keepass(group: &keepass::Group, use_verbose: bool) -> Self {
+        let name = group.name.to_owned();
         let child_groups = group
-            .child_groups
+            .children
             .iter()
-            .map(|(k, v)| (k.clone(), Group::from_keepass(&v, use_verbose)))
+            .filter_map(|node| match node {
+                Node::Group(g) => Some((g.name.clone(), Group::from_keepass(g, use_verbose))),
+                _ => None,
+            })
             .collect();
 
         let entries = group
-            .entries
+            .children
             .iter()
-            .map(|(k, v)| (k.clone(), Entry::from_keepass(&v, use_verbose)))
+            .filter_map(|node| match node {
+                Node::Group(_) => None,
+                Node::Entry(e) => Some((name.clone(), Entry::from_keepass(e, use_verbose))),
+            })
             .collect();
 
+        println!("child_groups: {:?}", child_groups);
+        println!("entries: {:?}", entries);
+
         Group {
-            name: group.name.to_owned(),
+            name,
             child_groups,
             entries,
             use_verbose,
