@@ -293,7 +293,7 @@ dependencies = [
 
 [[package]]
 name = "keepass-diff"
-version = "1.1.0"
+version = "1.1.1"
 dependencies = [
  "clap",
  "keepass",
