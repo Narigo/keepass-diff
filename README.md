@@ -13,6 +13,20 @@ RUSTFLAGS="-C target-cpu=native" cargo install keepass-diff
 The `RUSTFLAGS` variable will significantly boost performance. See
 [installation note in keepass-rs](https://github.com/sseemayer/keepass-rs#installation).
 
+### Using a container
+
+*NOTE: You can also replace `podman` with `docker` below.*
+
+Build container image:
+```
+podman build --iidfile=container_image_id .
+```
+
+Define alias to run keepass-diff container:
+```
+alias keepass-diff="podman run -it --rm -v "'`pwd`'":/app:z $(cat container_image_id)"
+```
+
 ## Usage
 
 ```
