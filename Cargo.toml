@@ -5,7 +5,7 @@ keywords = ["cli", "diff", "keepass"]
 repository = "https://github.com/Narigo/keepass-diff"
 license = "MIT"
 readme = "README.md"
-version = "1.1.1"
+version = "1.1.2"
 authors = ["Joern Bernhardt <joern.bernhardt@googlemail.com>"]
 
 # See https://crates.io/category_slugs
@@ -16,7 +16,7 @@ exclude = [
 ]
 
 [dependencies]
-clap = "2.33.0"
+clap = { version = "3.0.7", features = ["cargo", "env", "derive", "wrap_help"] }
 keepass = "=0.4.9"
 rpassword = "4.0.3"
 termcolor = "1.0.5"

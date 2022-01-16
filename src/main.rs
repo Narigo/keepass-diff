@@ -6,7 +6,7 @@ extern crate termcolor;
 pub mod diff;
 pub mod stack;
 
-use clap::{App, Arg};
+use clap::Parser;
 use diff::{group::Group, Diff, DiffDisplay};
 use keepass::{result::Error, result::Result, Database};
 
@@ -15,107 +15,77 @@ use termcolor::{Color, ColorChoice, ColorSpec, StandardStream, WriteColor};
 use std::path::Path;
 use std::{fs::File, io::Read};
 
-fn main() -> Result<()> {
-    let matches = App::new("keepass-diff")
-    .version("1.1.0")
-    .about("Shows differences between two .kdbx files")
-    .author("Joern Bernhardt")
-    .arg(
-      Arg::with_name("INPUT-A")
-        .help("Sets the first file")
-        .required(true)
-        .index(1),
-    )
-    .arg(
-      Arg::with_name("INPUT-B")
-        .help("Sets the second file")
-        .required(true)
-        .index(2),
-    )
-    .arg(
-      Arg::with_name("no-color")
-        .short("C")
-        .long("no-color")
-        .help("Disables color output")
-        .takes_value(false),
-    )
-    .arg(
-      Arg::with_name("verbose")
-        .short("v")
-        .long("verbose")
-        .help("Enables verbose output")
-        .takes_value(false),
-    )
-    .arg(
-      Arg::with_name("password-a")
-        .long("password-a")
-        .help("Sets the password for the first file (will be asked for if omitted)")
-        .takes_value(true),
-    )
-    .arg(
-      Arg::with_name("password-b")
-        .long("password-b")
-        .help("Sets the password for the second file (will be asked for if omitted)")
-        .takes_value(true),
-    )
-    .arg(
-      Arg::with_name("passwords")
-        .long("passwords")
-        .help("Sets the password for both files (if it's the same for both files)")
-        .takes_value(true),
-    )
-    .arg(
-      Arg::with_name("same-password")
-        .long("same-password")
-        .help("Asks for password only once, and tries to open both files with it")
-        .takes_value(false),
-    )
-    .arg(
-      Arg::with_name("no-password-a")
-        .long("no-password-a")
-        .help("Sets no password for the first file (and will not ask for it)")
-        .takes_value(false),
-    )
-    .arg(
-      Arg::with_name("no-password-b")
-        .long("no-password-b")
-        .help("Sets no password for the second file (and will not ask for it)")
-        .takes_value(false),
-    )
-    .arg(
-      Arg::with_name("no-passwords")
-        .long("no-passwords")
-        .help("Sets no password for both files (and will not ask for both files)")
-        .takes_value(false),
-    )
-    .arg(
-      Arg::with_name("keyfile-a")
-        .long("keyfile-a")
-        .help("Sets the key file for the first file")
-        .takes_value(true),
-    )
-    .arg(
-      Arg::with_name("keyfile-b")
-        .long("keyfile-b")
-        .help("Sets the key file for the second file")
-        .takes_value(true),
-    )
-    .arg(
-      Arg::with_name("keyfiles")
-        .long("keyfiles")
-        .help("Sets the same key file for both files (keyfile-a and keyfile-b would take precedence if set as well)")
-        .takes_value(true),
-    )
-    .get_matches();
+#[derive(Parser, Debug)]
+#[clap(author, version, about, long_about = None)]
+struct Args {
+    /// Sets the first file
+    #[clap(name = "INPUT-A", index = 1)]
+    input_a: String,
 
-    match (matches.value_of("INPUT-A"), matches.value_of("INPUT-B")) {
-        (Some(file_a), Some(file_b)) => {
+    /// Sets the second file
+    #[clap(name = "INPUT-B", index = 2)]
+    input_b: String,
+
+    /// Disables color output
+    #[clap(short = 'C', long = "no-color")]
+    no_color: bool,
+
+    /// Enables verbose output
+    #[clap(short = 'v', long)]
+    verbose: bool,
+
+    /// Sets the password for the first file (will be asked for if omitted)
+    #[clap(name = "password-a", long)]
+    password_a: Option<String>,
+
+    /// Sets the password for the second file (will be asked for if omitted)
+    #[clap(name = "password-b", long)]
+    password_b: Option<String>,
+
+    /// Sets the password for both files (if it's the same for both files)
+    #[clap(name = "passwords", long)]
+    passwords: Option<String>,
+
+    /// Asks for password only once, and tries to open both files with it
+    #[clap(name = "same-password", long)]
+    same_password: bool,
+
+    /// Sets no password for the first file (and will not ask for it)
+    #[clap(name = "no-password-a", long)]
+    no_password_a: bool,
+
+    /// Sets no password for the second file (and will not ask for it)
+    #[clap(name = "no-password-b", long)]
+    no_password_b: bool,
+
+    /// Sets no password for both files (and will not ask for both files)
+    #[clap(name = "no-passwords", long)]
+    no_passwords: bool,
+
+    /// Sets the key file for the first file
+    #[clap(name = "keyfile-a", long)]
+    keyfile_a: Option<String>,
+
+    /// Sets the key file for the second file
+    #[clap(name = "keyfile-b", long)]
+    keyfile_b: Option<String>,
+
+    /// Sets the same key file for both files (keyfile-a and keyfile-b would take precedence if set as well)
+    #[clap(name = "keyfiles", long)]
+    keyfiles: Option<String>,
+}
+
+fn main() -> Result<()> {
+    let arguments = Args::parse();
+
+    match (arguments.input_a, arguments.input_b) {
+        (file_a, file_b) => {
             let pass_a = match (
-                matches.value_of("password-a"),
-                matches.value_of("passwords"),
-                matches.is_present("same-password"),
-                matches.is_present("no-password-a"),
-                matches.is_present("no-passwords"),
+                arguments.password_a,
+                arguments.passwords.clone(),
+                arguments.same_password,
+                arguments.no_password_a,
+                arguments.no_passwords,
             ) {
                 (Some(password), _, _, _, _) => Some(String::from(password)),
                 (_, Some(password), _, _, _) => Some(String::from(password)),
@@ -125,11 +95,11 @@ fn main() -> Result<()> {
                 _ => prompt_password(format!("Password for file {}: ", file_a).as_str()),
             };
             let pass_b = match (
-                matches.value_of("password-b"),
-                matches.value_of("passwords"),
-                matches.is_present("same-password"),
-                matches.is_present("no-password-b"),
-                matches.is_present("no-passwords"),
+                arguments.password_b,
+                arguments.passwords.clone(),
+                arguments.same_password,
+                arguments.no_password_b,
+                arguments.no_passwords,
             ) {
                 (Some(password), _, _, _, _) => Some(String::from(password)),
                 (_, Some(password), _, _, _) => Some(String::from(password)),
@@ -138,14 +108,10 @@ fn main() -> Result<()> {
                 (_, _, _, _, true) => None,
                 _ => prompt_password(format!("Password for file {}: ", file_b).as_str()),
             };
-            let keyfile_a: Option<&str> = matches
-                .value_of("keyfile-a")
-                .or(matches.value_of("keyfiles"));
-            let keyfile_b: Option<&str> = matches
-                .value_of("keyfile-b")
-                .or(matches.value_of("keyfiles"));
-            let use_color: bool = !matches.is_present("no-color");
-            let use_verbose: bool = matches.is_present("verbose");
+            let keyfile_a: Option<String> = arguments.keyfile_a.or(arguments.keyfiles.clone());
+            let keyfile_b: Option<String> = arguments.keyfile_b.or(arguments.keyfiles.clone());
+            let use_color: bool = !arguments.no_color;
+            let use_verbose: bool = arguments.verbose;
 
             let db_a = kdbx_to_group(file_a, pass_a, keyfile_a, use_verbose)
                 .expect("Error opening database A");
@@ -164,7 +130,6 @@ fn main() -> Result<()> {
                 }
             );
         }
-        _ => println!("Need two .kdbx files as arguments"),
     }
 
     Ok(())
@@ -177,13 +142,13 @@ fn prompt_password(prompt: &str) -> Option<String> {
 }
 
 pub fn kdbx_to_group(
-    file: &str,
+    file: String,
     password: Option<String>,
-    keyfile_path: Option<&str>,
+    keyfile_path: Option<String>,
     use_verbose: bool,
 ) -> Result<Group> {
-    let mut keyfile = keyfile_path.map(|path| File::open(Path::new(path)).unwrap());
-    File::open(Path::new(file))
+    let mut keyfile = keyfile_path.map(|path| File::open(Path::new(path.as_str())).unwrap());
+    File::open(Path::new(file.as_str()))
         .map_err(|e| Error::from(e))
         .and_then(|mut db_file| {
             let db = Database::open(
