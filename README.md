@@ -59,36 +59,37 @@ It will still ask for a password, if the password flags are not provided.
 
 If you want to pipe the output of the command into another file or script, you
 may want to disable the terminal colors. You can do so with the `--no-color` or
-`-C` flag.
+`-C` option.
 
 `--help` yields:
 
 ```
+keepass-diff 1.1.2
+Joern Bernhardt <joern.bernhardt@googlemail.com>
+This CLI-tool reads two Keepass (.kdbx) files and prints their differences.
+
 USAGE:
-    keepass-diff [FLAGS] [OPTIONS] <INPUT-A> <INPUT-B>
-
-FLAGS:
-    -h, --help             Prints help information
-    -C, --no-color         Disables color output
-        --no-password-a    Sets no password for the first file (and will not ask for it)
-        --no-password-b    Sets no password for the second file (and will not ask for it)
-        --no-passwords     Sets no password for both files (and will not ask for both files)
-        --same-password    Asks for password only once, and tries to open both files with it
-    -V, --version          Prints version information
-    -v, --verbose          Enables verbose output
-
-OPTIONS:
-        --keyfile-a <keyfile-a>      Sets the key file for the first file
-        --keyfile-b <keyfile-b>      Sets the key file for the second file
-        --keyfiles <keyfiles>        Sets the same key file for both files (keyfile-a and keyfile-b would take
-                                     precedence if set as well)
-        --password-a <password-a>    Sets the password for the first file (will be asked for if omitted)
-        --password-b <password-b>    Sets the password for the second file (will be asked for if omitted)
-        --passwords <passwords>      Sets the password for both files (if it's the same for both files)
+    keepass-diff [OPTIONS] <INPUT-A> <INPUT-B>
 
 ARGS:
     <INPUT-A>    Sets the first file
     <INPUT-B>    Sets the second file
+
+OPTIONS:
+    -C, --no-color                   Disables color output
+    -h, --help                       Print help information
+        --keyfile-a <keyfile-a>      Sets the key file for the first file
+        --keyfile-b <keyfile-b>      Sets the key file for the second file
+        --keyfiles <keyfiles>        Sets the same key file for both files (keyfile-a and keyfile-b would take precedence if set as well)
+        --no-password-a              Sets no password for the first file (and will not ask for it)
+        --no-password-b              Sets no password for the second file (and will not ask for it)
+        --no-passwords               Sets no password for both files (and will not ask for both files)
+        --password-a <password-a>    Sets the password for the first file (will be asked for if omitted)
+        --password-b <password-b>    Sets the password for the second file (will be asked for if omitted)
+        --passwords <passwords>      Sets the password for both files (if it's the same for both files)
+        --same-password              Asks for password only once, and tries to open both files with it
+    -v, --verbose                    Enables verbose output
+    -V, --version                    Print version information
 ```
 
 ## Used libraries:
