@@ -4,6 +4,8 @@
 
   set -e
 
+  export RUSTFLAGS='-C target-cpu=native'
+
   test_equal() {
     if [ "$2" == "$3" ]; then
       echo "✅ $1"
