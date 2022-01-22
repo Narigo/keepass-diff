@@ -11,4 +11,4 @@ jobs:
 
       - name: Run integration tests 🏘
         run: |
-          . run_tests.sh
+          ./run-tests.sh
