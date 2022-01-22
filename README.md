@@ -36,7 +36,7 @@ To get the correct alias for your machine to use, run:
 alias keepass-diff='docker run -it --rm -v "$(pwd)":/app:ro "keepass-diff:custom-local"'
 ```
 
-This should return an `alias keepass-diff=...` command that you can copy and paste into your `.bashrc` or `.zshrc` file. This will make sure to have keepass-diff available whenever you start a new terminal session. Either start a new shell or run the command in the current terminal once to make it available right away.
+The `alias` command can be copy and pasted into your `.bashrc` or `.zshrc` file. This will make sure to have keepass-diff available whenever you start a new terminal session. Either start a new shell or run the command in the current terminal once to make it available right away.
 
 With the alias being set up, `keepass-diff` should be available. Try running:
 
