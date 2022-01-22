@@ -25,18 +25,21 @@ If you don't have the Rust toolchain installed, there is an alternative installa
 The following commands assume `docker` for building and running the container, but it should be possible to replace it with `podman` and maybe other engines. Please check whether the options are available.
 
 To build the container, run:
+
 ```
-docker build -f Containerfile.install --iidfile container_image_id .
+docker build -f Containerfile.install -t "keepass-diff:custom-local" .
 ```
 
 To get the correct alias for your machine to use, run:
+
 ```
-echo alias keepass-diff="'"docker run -it --rm -v '"'$(pwd)'"':/app:ro '"'$(cat container_image_id)'"'"'"
+alias keepass-diff='docker run -it --rm -v "$(pwd)":/app:ro "keepass-diff:custom-local"'
 ```
 
 This should return an `alias keepass-diff=...` command that you can copy and paste into your `.bashrc` or `.zshrc` file. This will make sure to have keepass-diff available whenever you start a new terminal session. Either start a new shell or run the command in the current terminal once to make it available right away.
 
 With the alias being set up, `keepass-diff` should be available. Try running:
+
 ```
 keepass-diff --help
 ```
