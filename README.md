@@ -6,12 +6,42 @@ This CLI-tool diffs two Keepass (.kdbx) files and prints their differences.
 
 ## Installation
 
+The main installation method is through Rust.
+
 ```
 RUSTFLAGS="-C target-cpu=native" cargo install keepass-diff
 ```
 
 The `RUSTFLAGS` variable will significantly boost performance. See
 [installation note in keepass-rs](https://github.com/sseemayer/keepass-rs#installation).
+
+### Alternative installation and usage using a container
+
+If you don't have the Rust toolchain installed, there is an alternative installation method using containers. There are two installation steps necessary to be able to run `keepass-diff` in your current working directory with a simple command:
+
+1. Build the container
+2. Set up an alias for simple usage
+
+The following commands assume `docker` for building and running the container, but it should be possible to replace it with `podman` and maybe other engines. Please check whether the options are available.
+
+To build the container, run:
+```
+docker build -f Containerfile.install --iidfile container_image_id .
+```
+
+To get the correct alias for your machine to use, run:
+```
+echo alias keepass-diff="'"docker run -it --rm -v '"'$(pwd)'"':/app:ro '"'$(cat container_image_id)'"'"'"
+```
+
+This should return an `alias keepass-diff=...` command that you can copy and paste into your `.bashrc` or `.zshrc` file. This will make sure to have keepass-diff available whenever you start a new terminal session. Either start a new shell or run the command in the current terminal once to make it available right away.
+
+With the alias being set up, `keepass-diff` should be available. Try running:
+```
+keepass-diff --help
+```
+
+**Note:** Keep in mind that the alias is set up in a way to allow the current working directory being mounted into the container. That means you're able to access files from this directory, but you won't be able to access files through an absolute path or using `../` from your host machine.
 
 ## Usage
 

@@ -1,0 +1,9 @@
+FROM rust:latest
+
+WORKDIR /app
+COPY . /app
+
+ENV RUSTFLAGS="-C target-cpu=native"
+RUN cargo install --path .
+
+ENTRYPOINT [ "keepass-diff" ]
