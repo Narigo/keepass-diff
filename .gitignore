@@ -2,3 +2,4 @@ docs/screencast.mov
 target/
 .DS_Store
 container_image_id
+tmp-tests/
