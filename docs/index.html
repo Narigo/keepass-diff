@@ -50,8 +50,29 @@
 </p>
 <p>This CLI-tool diffs two Keepass (.kdbx) files and prints their differences.</p>
 <h2 id="installation">Installation</h2></h2>
-<pre><code>cargo install keepass-diff
+<p>The main installation method is through Rust.</p>
+<pre><code>RUSTFLAGS=&quot;-C target-cpu=native&quot; cargo install keepass-diff
 </code></pre>
+<p>The <code>RUSTFLAGS</code> variable will significantly boost performance. See
+<a href="https://github.com/sseemayer/keepass-rs#installation">installation note in keepass-rs</a>.</p>
+<h3 id="alternative-installation-and-usage-using-a-container">Alternative installation and usage using a container</h3></h3>
+<p>If you don't have the Rust toolchain installed, there is an alternative installation method using containers. There are two installation steps necessary to be able to run <code>keepass-diff</code> in your current working directory with a simple command:</p>
+<ol>
+<li>Build the container</li>
+<li>Set up an alias for simple usage</li>
+</ol>
+<p>The following commands assume <code>docker</code> for building and running the container, but it should be possible to replace it with <code>podman</code> and maybe other engines. Please check whether the options are available.</p>
+<p>To build the container, run:</p>
+<pre><code>docker build -f Containerfile.install -t &quot;keepass-diff:custom-local&quot; .
+</code></pre>
+<p>To get the correct alias for your machine to use, run:</p>
+<pre><code>alias keepass-diff='docker run -it --rm -v &quot;$(pwd)&quot;:/app:ro &quot;keepass-diff:custom-local&quot;'
+</code></pre>
+<p>The <code>alias</code> command can be copy and pasted into your <code>.bashrc</code> or <code>.zshrc</code> file. This will make sure to have keepass-diff available whenever you start a new terminal session. Either start a new shell or run the command in the current terminal once to make it available right away.</p>
+<p>With the alias being set up, <code>keepass-diff</code> should be available. Try running:</p>
+<pre><code>keepass-diff --help
+</code></pre>
+<p><strong>Note:</strong> Keep in mind that the alias is set up in a way to allow the current working directory being mounted into the container. That means you're able to access files from this directory, but you won't be able to access files through an absolute path or using <code>../</code> from your host machine.</p>
 <h2 id="usage">Usage</h2></h2>
 <pre><code>keepass-diff &lt;file-a&gt; &lt;file-b&gt;
 </code></pre>
@@ -66,6 +87,10 @@ that this will expose them to other users logged on to the system):</p>
 flag. Be aware this has the same problem as above:</p>
 <pre><code>keepass-diff &lt;file-a&gt; &lt;file-b&gt; --passwords &lt;password&gt;
 </code></pre>
+<p>To avoid exposing the password, use <code>--same-password</code> instead. The CLI will ask
+you to type it once for both files.</p>
+<pre><code>keepass-diff &lt;file-a&gt; &lt;file-b&gt; --same-password
+</code></pre>
 <h3 id="providing-keyfiles">Providing keyfiles</h3></h3>
 <pre><code>keepass-diff &lt;file-a&gt; &lt;file-b&gt; --keyfile-a &lt;keyfile-a&gt; --keyfile-b &lt;keyfile-b&gt;
 </code></pre>
@@ -74,32 +99,34 @@ It will still ask for a password, if the password flags are not provided.</p>
 <h3 id="disabling-color-output-for-scripts">Disabling color output for scripts</h3></h3>
 <p>If you want to pipe the output of the command into another file or script, you
 may want to disable the terminal colors. You can do so with the <code>--no-color</code> or
-<code>-C</code> flag.</p>
+<code>-C</code> option.</p>
 <p><code>--help</code> yields:</p>
-<pre><code>USAGE:
-    keepass-diff [FLAGS] [OPTIONS] &lt;INPUT-A&gt; &lt;INPUT-B&gt;
+<pre><code>keepass-diff 1.1.2
+Joern Bernhardt &lt;joern.bernhardt@googlemail.com&gt;
+This CLI-tool reads two Keepass (.kdbx) files and prints their differences.
 
-FLAGS:
-    -h, --help             Prints help information
-    -C, --no-color         Disables color output
-        --no-password-a    Sets no password for the first file (and will not ask for it)
-        --no-password-b    Sets no password for the second file (and will not ask for it)
-        --no-passwords     Sets no password for both files (and will not ask for both files)
-    -V, --version          Prints version information
-    -v, --verbose          Enables verbose output
-
-OPTIONS:
-        --keyfile-a &lt;keyfile-a&gt;      Sets the key file for the first file
-        --keyfile-b &lt;keyfile-b&gt;      Sets the key file for the second file
-        --keyfiles &lt;keyfiles&gt;        Sets the same key file for both files (keyfile-a and keyfile-b would take
-                                     precedence if set as well)
-        --password-a &lt;password-a&gt;    Sets the password for the first file (will be asked for if omitted)
-        --password-b &lt;password-b&gt;    Sets the password for the second file (will be asked for if omitted)
-        --passwords &lt;passwords&gt;      Sets the password for both files (if it's the same for both files)
+USAGE:
+    keepass-diff [OPTIONS] &lt;INPUT-A&gt; &lt;INPUT-B&gt;
 
 ARGS:
     &lt;INPUT-A&gt;    Sets the first file
     &lt;INPUT-B&gt;    Sets the second file
+
+OPTIONS:
+    -C, --no-color                   Disables color output
+    -h, --help                       Print help information
+        --keyfile-a &lt;keyfile-a&gt;      Sets the key file for the first file
+        --keyfile-b &lt;keyfile-b&gt;      Sets the key file for the second file
+        --keyfiles &lt;keyfiles&gt;        Sets the same key file for both files (keyfile-a and keyfile-b would take precedence if set as well)
+        --no-password-a              Sets no password for the first file (and will not ask for it)
+        --no-password-b              Sets no password for the second file (and will not ask for it)
+        --no-passwords               Sets no password for both files (and will not ask for both files)
+        --password-a &lt;password-a&gt;    Sets the password for the first file (will be asked for if omitted)
+        --password-b &lt;password-b&gt;    Sets the password for the second file (will be asked for if omitted)
+        --passwords &lt;passwords&gt;      Sets the password for both files (if it's the same for both files)
+        --same-password              Asks for password only once, and tries to open both files with it
+    -v, --verbose                    Enables verbose output
+    -V, --version                    Print version information
 </code></pre>
 <h2 id="used-libraries">Used libraries:</h2></h2>
 <ul>
@@ -113,7 +140,8 @@ ARGS:
 <p><code>test_file.kdbx</code> is locked without password and keyfile <code>keyfile.key</code>.
 <code>test2_file.kdbx</code> is locked with <code>demopass</code> and the keyfile <code>keyfile.key</code>.</p>
 <p>A small bash script for running tests is <code>run-tests.sh</code>. It will run a few tests
-to see if the outputs is correct.</p>
+to see if the outputs is correct. Best run as
+<code>RUSTFLAGS=&quot;-C target-cpu=native&quot; ./run-tests.sh</code> for improved performance.</p>
 <h2 id="contributing">Contributing</h2></h2>
 <p>Care to help? I'm pretty new to Rust, so if anyone likes to help or teach me
 cool stuff, please reach out!</p>
