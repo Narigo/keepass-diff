@@ -31,7 +31,10 @@ impl Group {
             .iter()
             .filter_map(|node| match node {
                 Node::Group(_) => None,
-                Node::Entry(e) => Some((name.clone(), Entry::from_keepass(e, use_verbose))),
+                Node::Entry(e) => Some((
+                    e.get_title().unwrap_or_default().to_string(),
+                    Entry::from_keepass(e, use_verbose),
+                )),
             })
             .collect();
 
