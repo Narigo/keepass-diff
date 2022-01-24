@@ -1,9 +1,29 @@
-FROM rust:latest
-
-WORKDIR /app
-COPY . /app
+##
+# BUILD STAGE
+#############
+FROM ekidd/rust-musl-builder:latest AS builder
 
 ENV RUSTFLAGS="-C target-cpu=native"
-RUN cargo install --path .
 
-ENTRYPOINT [ "keepass-diff" ]
+# If we want to cache only the dependencies, we currently need to build twice -
+# once just for dependencies and once for everything after copying.
+COPY --chown=rust:rust Cargo.* ./
+RUN mkdir src/
+RUN echo 'fn main() {println!("dummy build for dependencies")}' > src/main.rs
+RUN cargo build --release
+
+# Remove the keepass-diff files of the dummy build
+RUN rm -f target/x86_64-unknown-linux-musl/release/deps/keepass_diff-*
+
+# Now run the real build after adding the real sources. The above lines are just
+# for allowing better caching
+COPY --chown=rust:rust src ./src
+RUN cargo build --release
+
+##
+# RUN STAGE
+#############
+FROM scratch
+WORKDIR /app
+COPY --from=builder /home/rust/src/target/x86_64-unknown-linux-musl/release/keepass-diff /usr/local/bin/
+ENTRYPOINT [ "/usr/local/bin/keepass-diff" ]
