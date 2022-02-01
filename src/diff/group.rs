@@ -20,8 +20,12 @@ impl Group {
         let child_groups = group
             .children
             .iter()
-            .filter_map(|node| match node {
-                Node::Group(g) => Some((g.name.clone(), Group::from_keepass(g, use_verbose))),
+            .enumerate()
+            .filter_map(|(index, node)| match node {
+                Node::Group(g) => Some((
+                    format!("{} [{}]", g.name.clone(), index),
+                    Group::from_keepass(g, use_verbose),
+                )),
                 _ => None,
             })
             .collect();
@@ -29,9 +33,13 @@ impl Group {
         let entries = group
             .children
             .iter()
-            .filter_map(|node| match node {
+            .enumerate()
+            .filter_map(|(index, node)| match node {
                 Node::Group(_) => None,
-                Node::Entry(e) => Some((name.clone(), Entry::from_keepass(e, use_verbose))),
+                Node::Entry(e) => Some((
+                    format!("{} [{}]", e.get("Title").unwrap_or_default(), index),
+                    Entry::from_keepass(e, index, use_verbose),
+                )),
             })
             .collect();
 

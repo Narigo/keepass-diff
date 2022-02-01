@@ -7,11 +7,12 @@ use crate::diff::{Diff, DiffResult, DiffResultFormat};
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Entry {
     pub fields: HashMap<String, Field>,
+    index: usize,
     use_verbose: bool,
 }
 
 impl Entry {
-    pub fn from_keepass(e: &keepass::Entry, use_verbose: bool) -> Self {
+    pub fn from_keepass(e: &keepass::Entry, index: usize, use_verbose: bool) -> Self {
         // username, password, etc. are just fields
         let fields = e
             .fields
@@ -36,6 +37,7 @@ impl Entry {
 
         Entry {
             fields,
+            index,
             use_verbose,
         }
     }
@@ -69,10 +71,11 @@ impl Diff for Entry {
 
 impl std::fmt::Display for Entry {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        let name = self.fields.get("Title").unwrap().value.clone();
         if self.use_verbose {
-            write!(f, "Entry '{}'", self.fields.get("Title").unwrap().value)
+            write!(f, "Entry '{}'", name)
         } else {
-            write!(f, "{}", self.fields.get("Title").unwrap().value)
+            write!(f, "{}", name)
         }
     }
 }

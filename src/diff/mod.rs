@@ -220,3 +220,20 @@ where
 
     (has_differences, acc)
 }
+
+#[cfg(test)]
+mod test {
+
+    use super::*;
+    use diff::group::Group;
+
+    #[test]
+    fn diff_empty_groups() {
+        let a = HashMap::<String, Group>::new();
+        let b = HashMap::<String, Group>::new();
+        let (has_differences, _) = diff_hashmap(&a, &b);
+
+        assert_eq!(false, has_differences);
+    }
+
+}
