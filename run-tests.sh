@@ -112,6 +112,29 @@
   test_equal "first run should have same amount of plus lines as second run has minus lines" $amount_of_plus_05 $amount_of_minus_06
   test_equal "first run should have same amount of minus lines as second run has plus lines" $amount_of_minus_05 $amount_of_plus_06
 
+  echo "### Testing snapshots against fixtures"
+  for dir in $(ls -1d test/test-*) ; do
+    IFS='_' read -a files <<< "$(basename $dir | cut -c6-)"
+    file_a=${files[0]}
+    file_b=${files[1]}
+  
+    for snapshot in "$dir"/* ; do
+      args=$(basename "${snapshot}" | cut -c8-)
+  
+      mkdir -p "res/$dir"
+      test_result_name="$PWD/tmp-tests/snapshot-result-$(basename $dir).txt"
+      cargo run -- test/__fixtures__/${file_a}.kdbx test/__fixtures__/${file_b}.kdbx ${args} > $test_result_name
+      echo "# Run $snapshot"
+      diff "$test_result_name" "$snapshot"
+      if [ "$?" -eq "0" ]; then
+        echo "✅ $snapshot"
+      else
+        echo "❌ $snapshot"
+        exit 1
+      fi
+    done
+  done
+
   echo "### Cleaning up test results - everything was good!"
   echo "# Removing temporary directory of test results"
   rm -r "$PWD/tmp-tests"

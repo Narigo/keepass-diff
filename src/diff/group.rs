@@ -8,8 +8,8 @@ use std::collections::HashMap;
 #[derive(Debug)]
 pub struct Group {
     name: String,
-    child_groups: HashMap<String, Group>,
-    entries: HashMap<String, Entry>,
+    child_groups: HashMap<String, Vec<Group>>,
+    entries: HashMap<String, Vec<Entry>>,
     use_verbose: bool,
 }
 
@@ -17,23 +17,28 @@ impl Group {
     /// Create an entries list from a keepass::Group
     pub fn from_keepass(group: &keepass::Group, use_verbose: bool) -> Self {
         let name = group.name.to_owned();
-        let child_groups = group
-            .children
-            .iter()
-            .filter_map(|node| match node {
-                Node::Group(g) => Some((g.name.clone(), Group::from_keepass(g, use_verbose))),
-                _ => None,
-            })
-            .collect();
 
-        let entries = group
-            .children
-            .iter()
-            .filter_map(|node| match node {
-                Node::Group(_) => None,
-                Node::Entry(e) => Some((name.clone(), Entry::from_keepass(e, use_verbose))),
-            })
-            .collect();
+        let mut child_groups: HashMap<String, Vec<Group>> = HashMap::new();
+        for node in group.children.iter() {
+            match node {
+                Node::Group(g) => child_groups
+                    .entry(g.name.clone())
+                    .or_insert(Vec::new())
+                    .push(Group::from_keepass(g, use_verbose)),
+                _ => {}
+            }
+        }
+
+        let mut entries: HashMap<String, Vec<Entry>> = HashMap::new();
+        for node in group.children.iter() {
+            match node {
+                Node::Entry(e) => entries
+                    .entry(e.get("Title").unwrap_or_default().to_owned())
+                    .or_insert(Vec::new())
+                    .push(Entry::from_keepass(e, use_verbose)),
+                _ => {}
+            }
+        }
 
         Group {
             name,

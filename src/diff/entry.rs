@@ -44,7 +44,7 @@ impl Entry {
 impl Diff for Entry {
     fn diff<'a>(&'a self, other: &'a Self) -> DiffResult<'a, Self> {
         let (has_differences, field_differences) =
-            crate::diff::diff_hashmap(&self.fields, &other.fields);
+            crate::diff::diff_entry(&self.fields, &other.fields);
 
         if has_differences {
             let mut inner_differences: Vec<Box<dyn DiffResultFormat>> = Vec::new();
@@ -69,10 +69,11 @@ impl Diff for Entry {
 
 impl std::fmt::Display for Entry {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        let name = self.fields.get("Title").unwrap().value.clone();
         if self.use_verbose {
-            write!(f, "Entry '{}'", self.fields.get("Title").unwrap().value)
+            write!(f, "Entry '{}'", name)
         } else {
-            write!(f, "{}", self.fields.get("Title").unwrap().value)
+            write!(f, "{}", name)
         }
     }
 }
