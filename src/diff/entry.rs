@@ -7,12 +7,11 @@ use crate::diff::{Diff, DiffResult, DiffResultFormat};
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Entry {
     pub fields: HashMap<String, Field>,
-    index: usize,
     use_verbose: bool,
 }
 
 impl Entry {
-    pub fn from_keepass(e: &keepass::Entry, index: usize, use_verbose: bool) -> Self {
+    pub fn from_keepass(e: &keepass::Entry, use_verbose: bool) -> Self {
         // username, password, etc. are just fields
         let fields = e
             .fields
@@ -37,7 +36,6 @@ impl Entry {
 
         Entry {
             fields,
-            index,
             use_verbose,
         }
     }
@@ -46,7 +44,7 @@ impl Entry {
 impl Diff for Entry {
     fn diff<'a>(&'a self, other: &'a Self) -> DiffResult<'a, Self> {
         let (has_differences, field_differences) =
-            crate::diff::diff_hashmap(&self.fields, &other.fields);
+            crate::diff::diff_entry(&self.fields, &other.fields);
 
         if has_differences {
             let mut inner_differences: Vec<Box<dyn DiffResultFormat>> = Vec::new();
