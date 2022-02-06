@@ -97,7 +97,7 @@ may want to disable the terminal colors. You can do so with the `--no-color` or
 `--help` yields:
 
 ```
-keepass-diff 1.1.2
+keepass-diff 1.1.3
 Joern Bernhardt <joern.bernhardt@googlemail.com>
 This CLI-tool reads two Keepass (.kdbx) files and prints their differences.
 
