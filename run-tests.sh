@@ -36,9 +36,9 @@
 
   echo "### Running verbose equality tests, depending on order"
   echo "# Run a <diff> b"
-  cargo run "$PWD/test/test.kdbx" "$PWD/test/test2.kdbx" --passwords demopass --no-color --verbose >"$PWD/tmp-tests/test-result-01.txt"
+  cargo run --release -- "$PWD/test/test.kdbx" "$PWD/test/test2.kdbx" --passwords demopass --no-color --verbose >"$PWD/tmp-tests/test-result-01.txt"
   echo "# Run b <diff> a"
-  cargo run "$PWD/test/test2.kdbx" "$PWD/test/test.kdbx" --passwords demopass --no-color --verbose >"$PWD/tmp-tests/test-result-02.txt"
+  cargo run --release -- "$PWD/test/test2.kdbx" "$PWD/test/test.kdbx" --passwords demopass --no-color --verbose >"$PWD/tmp-tests/test-result-02.txt"
 
   lines_of_run_01=$(cat "$PWD/tmp-tests/test-result-01.txt" | wc -l)
   lines_of_run_02=$(cat "$PWD/tmp-tests/test-result-02.txt" | wc -l)
@@ -62,9 +62,9 @@
 
   echo "### Running regular equality tests, depending on order"
   echo "# Run a <diff> b"
-  cargo run "$PWD/test/test.kdbx" "$PWD/test/test2.kdbx" --passwords demopass --no-color >"$PWD/tmp-tests/test-result-03.txt"
+  cargo run --release -- "$PWD/test/test.kdbx" "$PWD/test/test2.kdbx" --passwords demopass --no-color >"$PWD/tmp-tests/test-result-03.txt"
   echo "# Run b <diff> a"
-  cargo run "$PWD/test/test2.kdbx" "$PWD/test/test.kdbx" --passwords demopass --no-color >"$PWD/tmp-tests/test-result-04.txt"
+  cargo run --release -- "$PWD/test/test2.kdbx" "$PWD/test/test.kdbx" --passwords demopass --no-color >"$PWD/tmp-tests/test-result-04.txt"
 
   lines_of_run_03=$(cat "$PWD/tmp-tests/test-result-03.txt" | wc -l)
   lines_of_run_04=$(cat "$PWD/tmp-tests/test-result-04.txt" | wc -l)
@@ -88,9 +88,9 @@
 
   echo "### Running test to open KDBX 3.1 files"
   echo "# Run a <diff> b"
-  cargo run --release "$PWD/test/issue-24-kdbx-3.1/Test1.kdbx" "$PWD/test/issue-24-kdbx-3.1/Test2.kdbx" --password-a Test1 --password-b Test2 --no-color >"$PWD/tmp-tests/test-result-05.txt"
+  cargo run --release -- "$PWD/test/issue-24-kdbx-3.1/Test1.kdbx" "$PWD/test/issue-24-kdbx-3.1/Test2.kdbx" --password-a Test1 --password-b Test2 --no-color >"$PWD/tmp-tests/test-result-05.txt"
   echo "# Run b <diff> a"
-  cargo run --release "$PWD/test/issue-24-kdbx-3.1/Test2.kdbx" "$PWD/test/issue-24-kdbx-3.1/Test1.kdbx" --password-a Test2 --password-b Test1 --no-color >"$PWD/tmp-tests/test-result-06.txt"
+  cargo run --release -- "$PWD/test/issue-24-kdbx-3.1/Test2.kdbx" "$PWD/test/issue-24-kdbx-3.1/Test1.kdbx" --password-a Test2 --password-b Test1 --no-color >"$PWD/tmp-tests/test-result-06.txt"
 
   lines_of_run_05=$(cat "$PWD/tmp-tests/test-result-05.txt" | wc -l)
   lines_of_run_06=$(cat "$PWD/tmp-tests/test-result-06.txt" | wc -l)
@@ -123,7 +123,7 @@
   
       mkdir -p "res/$dir"
       test_result_name="$PWD/tmp-tests/snapshot-result-$(basename $dir).txt"
-      cargo run -- test/__fixtures__/${file_a}.kdbx test/__fixtures__/${file_b}.kdbx ${args} > $test_result_name
+      cargo run --release -- test/__fixtures__/${file_a}.kdbx test/__fixtures__/${file_b}.kdbx ${args} > $test_result_name
       echo "# Run $snapshot"
       diff "$test_result_name" "$snapshot"
       if [ "$?" -eq "0" ]; then
