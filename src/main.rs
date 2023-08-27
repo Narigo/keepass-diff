@@ -8,7 +8,7 @@ pub mod stack;
 
 use clap::Parser;
 use diff::{group::Group, Diff, DiffDisplay};
-use keepass::{result::Error, result::Result, Database};
+use keepass::{error::DatabaseOpenError, Database, DatabaseKey};
 
 use termcolor::{Color, ColorChoice, ColorSpec, StandardStream, WriteColor};
 
@@ -75,7 +75,7 @@ struct Args {
     keyfiles: Option<String>,
 }
 
-fn main() -> Result<()> {
+fn main() -> Result<(), ()> {
     let arguments = Args::parse();
 
     match (arguments.input_a, arguments.input_b) {
@@ -136,7 +136,7 @@ fn main() -> Result<()> {
 }
 
 fn prompt_password(prompt: &str) -> Option<String> {
-    rpassword::prompt_password_stdout(prompt)
+    rpassword::prompt_password(prompt)
         .map(|s| if s == "" { None } else { Some(s) })
         .unwrap_or(None)
 }
@@ -146,16 +146,16 @@ pub fn kdbx_to_group(
     password: Option<String>,
     keyfile_path: Option<String>,
     use_verbose: bool,
-) -> Result<Group> {
+) -> Result<Group, DatabaseOpenError> {
     let mut keyfile = keyfile_path.map(|path| File::open(Path::new(path.as_str())).unwrap());
     File::open(Path::new(file.as_str()))
-        .map_err(|e| Error::from(e))
+        .map_err(|e| DatabaseOpenError::from(e))
         .and_then(|mut db_file| {
-            let db = Database::open(
-                &mut db_file,
-                password.as_ref().map(|s| s.as_str()),
-                keyfile.as_mut().map(|f| f as &mut dyn Read),
-            );
+            let db_key = DatabaseKey {
+                password: password.as_ref().map(|s| s.as_str()),
+                keyfile: keyfile.as_mut().map(|f| f as &mut dyn Read),
+            };
+            let db = Database::open(&mut db_file, db_key);
             db
         })
         .map(|db: Database| Group::from_keepass(&db.root, use_verbose))

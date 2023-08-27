@@ -1,4 +1,4 @@
-use keepass::Value;
+use keepass::db::Value;
 use std::collections::HashMap;
 
 use crate::diff::field::Field;
@@ -11,7 +11,7 @@ pub struct Entry {
 }
 
 impl Entry {
-    pub fn from_keepass(e: &keepass::Entry, use_verbose: bool) -> Self {
+    pub fn from_keepass(e: &keepass::db::Entry, use_verbose: bool) -> Self {
         // username, password, etc. are just fields
         let fields = e
             .fields
