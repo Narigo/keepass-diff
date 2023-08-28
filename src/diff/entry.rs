@@ -69,7 +69,16 @@ impl Diff for Entry {
 
 impl std::fmt::Display for Entry {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        let name = self.fields.get("Title").unwrap().value.clone();
+        let name = self
+            .fields
+            .get("Title")
+            .unwrap_or(&Field {
+                name: "Title".to_string(),
+                value: "".to_string(),
+                use_verbose: self.use_verbose,
+            })
+            .value
+            .clone();
         if self.use_verbose {
             write!(f, "Entry '{}'", name)
         } else {
