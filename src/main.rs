@@ -164,3 +164,8 @@ pub fn set_fg(color: Option<Color>) {
     let mut stdout = StandardStream::stdout(ColorChoice::Always);
     stdout.set_color(ColorSpec::new().set_fg(color)).expect("Setting colors in your console failed. Please use the --no-color flag to disable colors if the error persists.");
 }
+
+pub fn reset_color() {
+    let mut stdout = StandardStream::stdout(ColorChoice::Always);
+    stdout.reset().expect("Resetting colors in your console failed. Please use the --no-color flag to disable colors if the error persists.");
+}

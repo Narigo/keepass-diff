@@ -55,8 +55,13 @@ pub struct DiffDisplay<'a, T: DiffResultFormat> {
 
 impl<'a, T: DiffResultFormat> std::fmt::Display for DiffDisplay<'a, T> {
     fn fmt(&self, mut f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        self.inner
-            .diff_result_format(&mut f, &self.path, self.use_color, self.use_verbose)
+        let result =
+            self.inner
+                .diff_result_format(&mut f, &self.path, self.use_color, self.use_verbose);
+        if self.use_color {
+            crate::reset_color();
+        }
+        result
     }
 }
 
@@ -107,10 +112,10 @@ where
                 inner_differences,
                 ..
             } => {
-                if use_color {
-                    crate::set_fg(Some(Color::Yellow));
-                }
                 if use_verbose {
+                    if use_color {
+                        crate::set_fg(Some(Color::Yellow));
+                    }
                     let indent = "  ".repeat(path.len());
                     write!(f, "~ {}{}\n", indent, left)?;
                 }
@@ -155,10 +160,6 @@ where
                 }
             }
         };
-
-        if use_color {
-            crate::set_fg(None);
-        }
 
         Ok(())
     }
