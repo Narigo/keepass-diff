@@ -155,8 +155,7 @@ pub fn kdbx_to_group(
                 password: password.as_ref().map(|s| s.as_str()),
                 keyfile: keyfile.as_mut().map(|f| f as &mut dyn Read),
             };
-            let db = Database::open(&mut db_file, db_key);
-            db
+            Database::open(&mut db_file, db_key)
         })
         .map(|db: Database| Group::from_keepass(&db.root, use_verbose))
 }
