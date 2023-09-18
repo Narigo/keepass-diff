@@ -136,7 +136,7 @@ fn main() -> Result<()> {
 }
 
 fn prompt_password(prompt: &str) -> Option<String> {
-    rpassword::prompt_password_stdout(prompt)
+    rpassword::prompt_password(prompt)
         .map(|s| if s == "" { None } else { Some(s) })
         .unwrap_or(None)
 }

@@ -18,5 +18,5 @@ exclude = [
 [dependencies]
 clap = { version = "3.0.10", features = ["cargo", "env", "derive", "wrap_help"] }
 keepass = "=0.4.10"
-rpassword = "5.0.1"
+rpassword = "7.2.0"
 termcolor = "1.1.2"
