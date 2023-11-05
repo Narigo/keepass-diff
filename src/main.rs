@@ -1,3 +1,4 @@
+extern crate base64;
 extern crate clap;
 extern crate keepass;
 extern crate rpassword;
@@ -33,6 +34,10 @@ struct Args {
     /// Enables verbose output
     #[clap(short = 'v', long)]
     verbose: bool,
+
+    /// Enables verbose output
+    #[clap(short = 'm', long = "mask-passwords")]
+    mask_passwords: bool,
 
     /// Sets the password for the first file (will be asked for if omitted)
     #[clap(name = "password-a", long)]
@@ -112,10 +117,11 @@ fn main() -> Result<(), ()> {
             let keyfile_b: Option<String> = arguments.keyfile_b.or(arguments.keyfiles.clone());
             let use_color: bool = !arguments.no_color;
             let use_verbose: bool = arguments.verbose;
+            let mask_passwords: bool = arguments.mask_passwords;
 
-            let db_a = kdbx_to_group(file_a, pass_a, keyfile_a, use_verbose)
+            let db_a = kdbx_to_group(file_a, pass_a, keyfile_a, use_verbose, mask_passwords)
                 .expect("Error opening database A");
-            let db_b = kdbx_to_group(file_b, pass_b, keyfile_b, use_verbose)
+            let db_b = kdbx_to_group(file_b, pass_b, keyfile_b, use_verbose, mask_passwords)
                 .expect("Error opening database B");
 
             let delta = db_a.diff(&db_b);
@@ -126,7 +132,8 @@ fn main() -> Result<(), ()> {
                     inner: delta,
                     path: stack::Stack::empty(),
                     use_color,
-                    use_verbose
+                    use_verbose,
+                    mask_passwords,
                 }
             );
         }
@@ -146,6 +153,7 @@ pub fn kdbx_to_group(
     password: Option<String>,
     keyfile_path: Option<String>,
     use_verbose: bool,
+    mask_passwords: bool,
 ) -> Result<Group, DatabaseOpenError> {
     let mut keyfile = keyfile_path.map(|path| File::open(Path::new(path.as_str())).unwrap());
     File::open(Path::new(file.as_str()))
@@ -157,7 +165,7 @@ pub fn kdbx_to_group(
             };
             Database::open(&mut db_file, db_key)
         })
-        .map(|db: Database| Group::from_keepass(&db.root, use_verbose))
+        .map(|db: Database| Group::from_keepass(&db.root, use_verbose, mask_passwords))
 }
 
 pub fn set_fg(color: Option<Color>) {

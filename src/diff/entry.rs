@@ -1,17 +1,19 @@
+use base64::{engine::general_purpose, Engine as _};
 use keepass::db::Value;
 use std::collections::HashMap;
 
-use crate::diff::field::Field;
+use crate::diff::field::{Field, ValueType};
 use crate::diff::{Diff, DiffResult, DiffResultFormat};
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Entry {
     pub fields: HashMap<String, Field>,
     use_verbose: bool,
+    mask_passwords: bool,
 }
 
 impl Entry {
-    pub fn from_keepass(e: &keepass::db::Entry, use_verbose: bool) -> Self {
+    pub fn from_keepass(e: &keepass::db::Entry, use_verbose: bool, mask_passwords: bool) -> Self {
         // username, password, etc. are just fields
         let fields = e
             .fields
@@ -22,13 +24,19 @@ impl Entry {
                     Field {
                         name: k.to_owned(),
                         value: match v {
-                            Value::Bytes(b) => String::from_utf8_lossy(b).to_string(),
+                            Value::Bytes(b) => general_purpose::STANDARD_NO_PAD.encode(b),
                             Value::Unprotected(v) => v.to_owned(),
                             Value::Protected(p) => String::from_utf8(p.unsecure().to_owned())
                                 .unwrap()
                                 .to_owned(),
                         },
+                        kind: match v {
+                            Value::Bytes(_) => ValueType::Binary,
+                            Value::Unprotected(_) => ValueType::Unprotected,
+                            Value::Protected(_) => ValueType::Protected,
+                        },
                         use_verbose,
+                        mask_passwords,
                     },
                 )
             })
@@ -37,6 +45,7 @@ impl Entry {
         Entry {
             fields,
             use_verbose,
+            mask_passwords,
         }
     }
 }
@@ -75,7 +84,9 @@ impl std::fmt::Display for Entry {
             .unwrap_or(&Field {
                 name: "Title".to_string(),
                 value: "".to_string(),
+                kind: ValueType::Unprotected,
                 use_verbose: self.use_verbose,
+                mask_passwords: self.mask_passwords,
             })
             .value
             .clone();

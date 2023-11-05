@@ -42,6 +42,7 @@ pub trait DiffResultFormat: std::fmt::Debug {
         path: &Stack<&String>,
         use_color: bool,
         use_verbose: bool,
+        mask_passwords: bool,
     ) -> std::fmt::Result;
 }
 
@@ -51,13 +52,14 @@ pub struct DiffDisplay<'a, T: DiffResultFormat> {
     pub path: Stack<&'a String>,
     pub use_color: bool,
     pub use_verbose: bool,
+    pub mask_passwords: bool,
 }
 
 impl<'a, T: DiffResultFormat> std::fmt::Display for DiffDisplay<'a, T> {
     fn fmt(&self, mut f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let result =
             self.inner
-                .diff_result_format(&mut f, &self.path, self.use_color, self.use_verbose);
+                .diff_result_format(&mut f, &self.path, self.use_color, self.use_verbose, self.mask_passwords);
         if self.use_color {
             crate::reset_color();
         }
@@ -76,6 +78,7 @@ where
         path: &Stack<&String>,
         use_color: bool,
         use_verbose: bool,
+        mask_passwords: bool,
     ) -> std::fmt::Result {
         let _ = match self {
             DiffResult::Identical { .. } => Ok(()),
@@ -125,6 +128,7 @@ where
                         &path.append(&format!("{}", left)),
                         use_color,
                         use_verbose,
+                        mask_passwords,
                     )?;
                 }
                 Ok(())

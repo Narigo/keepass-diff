@@ -14,7 +14,7 @@ pub struct Group {
 
 impl Group {
     /// Create an entries list from a keepass::Group
-    pub fn from_keepass(group: &keepass::db::Group, use_verbose: bool) -> Self {
+    pub fn from_keepass(group: &keepass::db::Group, use_verbose: bool, mask_passwords: bool) -> Self {
         let name = group.name.to_owned();
 
         let mut child_groups: HashMap<String, Vec<Group>> = HashMap::new();
@@ -23,7 +23,7 @@ impl Group {
                 keepass::db::Node::Group(g) => child_groups
                     .entry(g.name.clone())
                     .or_insert(Vec::new())
-                    .push(Group::from_keepass(g, use_verbose)),
+                    .push(Group::from_keepass(g, use_verbose, mask_passwords)),
                 _ => {}
             }
         }
@@ -34,7 +34,7 @@ impl Group {
                 keepass::db::Node::Entry(e) => entries
                     .entry(e.get("Title").unwrap_or_default().to_owned())
                     .or_insert(Vec::new())
-                    .push(Entry::from_keepass(e, use_verbose)),
+                    .push(Entry::from_keepass(e, use_verbose, mask_passwords)),
                 _ => {}
             }
         }
