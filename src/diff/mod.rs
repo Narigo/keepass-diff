@@ -57,9 +57,13 @@ pub struct DiffDisplay<'a, T: DiffResultFormat> {
 
 impl<'a, T: DiffResultFormat> std::fmt::Display for DiffDisplay<'a, T> {
     fn fmt(&self, mut f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let result =
-            self.inner
-                .diff_result_format(&mut f, &self.path, self.use_color, self.use_verbose, self.mask_passwords);
+        let result = self.inner.diff_result_format(
+            &mut f,
+            &self.path,
+            self.use_color,
+            self.use_verbose,
+            self.mask_passwords,
+        );
         if self.use_color {
             crate::reset_color();
         }

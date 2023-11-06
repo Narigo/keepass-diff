@@ -153,7 +153,7 @@ pub fn kdbx_to_group(
     keyfile_path: Option<String>,
     use_verbose: bool,
     mask_passwords: bool,
-) -> Result<Group, DatabaseOpenError> {    
+) -> Result<Group, DatabaseOpenError> {
     let db_key = get_database_key(password, keyfile_path)?;
     let db = Database::open(&mut File::open(file)?, db_key)?;
     Ok(Group::from_keepass(&db.root, use_verbose, mask_passwords))

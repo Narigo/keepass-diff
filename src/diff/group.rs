@@ -14,7 +14,11 @@ pub struct Group {
 
 impl Group {
     /// Create an entries list from a keepass::Group
-    pub fn from_keepass(group: &keepass::db::Group, use_verbose: bool, mask_passwords: bool) -> Self {
+    pub fn from_keepass(
+        group: &keepass::db::Group,
+        use_verbose: bool,
+        mask_passwords: bool,
+    ) -> Self {
         let name = group.name.to_owned();
 
         let mut child_groups: HashMap<String, Vec<Group>> = HashMap::new();
