@@ -13,8 +13,7 @@ use keepass::{error::DatabaseOpenError, Database, DatabaseKey};
 
 use termcolor::{Color, ColorChoice, ColorSpec, StandardStream, WriteColor};
 
-use std::path::Path;
-use std::{fs::File, io::Read};
+use std::fs::File;
 
 #[derive(Parser, Debug)]
 #[clap(author, version, about, long_about = None)]
@@ -154,18 +153,26 @@ pub fn kdbx_to_group(
     keyfile_path: Option<String>,
     use_verbose: bool,
     mask_passwords: bool,
-) -> Result<Group, DatabaseOpenError> {
-    let mut keyfile = keyfile_path.map(|path| File::open(Path::new(path.as_str())).unwrap());
-    File::open(Path::new(file.as_str()))
-        .map_err(|e| DatabaseOpenError::from(e))
-        .and_then(|mut db_file| {
-            let db_key = DatabaseKey {
-                password: password.as_ref().map(|s| s.as_str()),
-                keyfile: keyfile.as_mut().map(|f| f as &mut dyn Read),
-            };
-            Database::open(&mut db_file, db_key)
-        })
-        .map(|db: Database| Group::from_keepass(&db.root, use_verbose, mask_passwords))
+) -> Result<Group, DatabaseOpenError> {    
+    let db_key = get_database_key(password, keyfile_path)?;
+    let db = Database::open(&mut File::open(file)?, db_key)?;
+    Ok(Group::from_keepass(&db.root, use_verbose, mask_passwords))
+}
+
+fn get_database_key(
+    password: Option<String>,
+    keyfile_path: Option<String>,
+) -> Result<DatabaseKey, std::io::Error> {
+    let db_key = DatabaseKey::new();
+    let db_key = match password {
+        Some(pwd) => db_key.with_password(pwd.as_str()),
+        _ => db_key,
+    };
+    if let Some(path) = keyfile_path {
+        db_key.with_keyfile(&mut File::open(path)?)
+    } else {
+        Ok(db_key)
+    }
 }
 
 pub fn set_fg(color: Option<Color>) {
