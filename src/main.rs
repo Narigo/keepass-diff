@@ -1,3 +1,4 @@
+extern crate base64;
 extern crate clap;
 extern crate keepass;
 extern crate rpassword;
@@ -8,12 +9,11 @@ pub mod stack;
 
 use clap::Parser;
 use diff::{group::Group, Diff, DiffDisplay};
-use keepass::{result::Error, result::Result, Database};
+use keepass::{error::DatabaseOpenError, Database, DatabaseKey};
 
 use termcolor::{Color, ColorChoice, ColorSpec, StandardStream, WriteColor};
 
-use std::path::Path;
-use std::{fs::File, io::Read};
+use std::fs::File;
 
 #[derive(Parser, Debug)]
 #[clap(author, version, about, long_about = None)]
@@ -33,6 +33,10 @@ struct Args {
     /// Enables verbose output
     #[clap(short = 'v', long)]
     verbose: bool,
+
+    /// Enables verbose output
+    #[clap(short = 'm', long = "mask-passwords")]
+    mask_passwords: bool,
 
     /// Sets the password for the first file (will be asked for if omitted)
     #[clap(name = "password-a", long)]
@@ -75,7 +79,7 @@ struct Args {
     keyfiles: Option<String>,
 }
 
-fn main() -> Result<()> {
+fn main() -> Result<(), ()> {
     let arguments = Args::parse();
 
     match (arguments.input_a, arguments.input_b) {
@@ -112,10 +116,11 @@ fn main() -> Result<()> {
             let keyfile_b: Option<String> = arguments.keyfile_b.or(arguments.keyfiles.clone());
             let use_color: bool = !arguments.no_color;
             let use_verbose: bool = arguments.verbose;
+            let mask_passwords: bool = arguments.mask_passwords;
 
-            let db_a = kdbx_to_group(file_a, pass_a, keyfile_a, use_verbose)
+            let db_a = kdbx_to_group(file_a, pass_a, keyfile_a, use_verbose, mask_passwords)
                 .expect("Error opening database A");
-            let db_b = kdbx_to_group(file_b, pass_b, keyfile_b, use_verbose)
+            let db_b = kdbx_to_group(file_b, pass_b, keyfile_b, use_verbose, mask_passwords)
                 .expect("Error opening database B");
 
             let delta = db_a.diff(&db_b);
@@ -126,7 +131,8 @@ fn main() -> Result<()> {
                     inner: delta,
                     path: stack::Stack::empty(),
                     use_color,
-                    use_verbose
+                    use_verbose,
+                    mask_passwords,
                 }
             );
         }
@@ -136,7 +142,7 @@ fn main() -> Result<()> {
 }
 
 fn prompt_password(prompt: &str) -> Option<String> {
-    rpassword::prompt_password_stdout(prompt)
+    rpassword::prompt_password(prompt)
         .map(|s| if s == "" { None } else { Some(s) })
         .unwrap_or(None)
 }
@@ -146,22 +152,35 @@ pub fn kdbx_to_group(
     password: Option<String>,
     keyfile_path: Option<String>,
     use_verbose: bool,
-) -> Result<Group> {
-    let mut keyfile = keyfile_path.map(|path| File::open(Path::new(path.as_str())).unwrap());
-    File::open(Path::new(file.as_str()))
-        .map_err(|e| Error::from(e))
-        .and_then(|mut db_file| {
-            let db = Database::open(
-                &mut db_file,
-                password.as_ref().map(|s| s.as_str()),
-                keyfile.as_mut().map(|f| f as &mut dyn Read),
-            );
-            db
-        })
-        .map(|db: Database| Group::from_keepass(&db.root, use_verbose))
+    mask_passwords: bool,
+) -> Result<Group, DatabaseOpenError> {    
+    let db_key = get_database_key(password, keyfile_path)?;
+    let db = Database::open(&mut File::open(file)?, db_key)?;
+    Ok(Group::from_keepass(&db.root, use_verbose, mask_passwords))
+}
+
+fn get_database_key(
+    password: Option<String>,
+    keyfile_path: Option<String>,
+) -> Result<DatabaseKey, std::io::Error> {
+    let db_key = DatabaseKey::new();
+    let db_key = match password {
+        Some(pwd) => db_key.with_password(pwd.as_str()),
+        _ => db_key,
+    };
+    if let Some(path) = keyfile_path {
+        db_key.with_keyfile(&mut File::open(path)?)
+    } else {
+        Ok(db_key)
+    }
 }
 
 pub fn set_fg(color: Option<Color>) {
     let mut stdout = StandardStream::stdout(ColorChoice::Always);
     stdout.set_color(ColorSpec::new().set_fg(color)).expect("Setting colors in your console failed. Please use the --no-color flag to disable colors if the error persists.");
+}
+
+pub fn reset_color() {
+    let mut stdout = StandardStream::stdout(ColorChoice::Always);
+    stdout.reset().expect("Resetting colors in your console failed. Please use the --no-color flag to disable colors if the error persists.");
 }
