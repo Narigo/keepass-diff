@@ -94,35 +94,41 @@ If you want to pipe the output of the command into another file or script, you
 may want to disable the terminal colors. You can do so with the `--no-color` or
 `-C` option.
 
+### Obfuscate passwords in output
+
+`keepass-diff` usually shows changed passwords. If you need it to obfuscate
+these protected fields, use `--mask-passwords` (or `-m`) to show `***` instead
+of the real passwords. Be aware that the output can show a changed line without
+actual visible changes in the output then.
+
 `--help` yields:
 
 ```
-keepass-diff 1.1.4
-Joern Bernhardt <joern.bernhardt@googlemail.com>
 This CLI-tool reads two Keepass (.kdbx) files and prints their differences.
 
-USAGE:
-    keepass-diff [OPTIONS] <INPUT-A> <INPUT-B>
+Usage: keepass-diff [OPTIONS] <INPUT-A> <INPUT-B>
 
-ARGS:
-    <INPUT-A>    Sets the first file
-    <INPUT-B>    Sets the second file
+Arguments:
+  <INPUT-A>  Sets the first file
+  <INPUT-B>  Sets the second file
 
-OPTIONS:
-    -C, --no-color                   Disables color output
-    -h, --help                       Print help information
-        --keyfile-a <keyfile-a>      Sets the key file for the first file
-        --keyfile-b <keyfile-b>      Sets the key file for the second file
-        --keyfiles <keyfiles>        Sets the same key file for both files (keyfile-a and keyfile-b would take precedence if set as well)
-        --no-password-a              Sets no password for the first file (and will not ask for it)
-        --no-password-b              Sets no password for the second file (and will not ask for it)
-        --no-passwords               Sets no password for both files (and will not ask for both files)
-        --password-a <password-a>    Sets the password for the first file (will be asked for if omitted)
-        --password-b <password-b>    Sets the password for the second file (will be asked for if omitted)
-        --passwords <passwords>      Sets the password for both files (if it's the same for both files)
-        --same-password              Asks for password only once, and tries to open both files with it
-    -v, --verbose                    Enables verbose output
-    -V, --version                    Print version information
+Options:
+  -C, --no-color                 Disables color output
+  -v, --verbose                  Enables verbose output
+  -m, --mask-passwords           Enables verbose output
+      --password-a <password-a>  Sets the password for the first file (will be asked for if omitted)
+      --password-b <password-b>  Sets the password for the second file (will be asked for if omitted)
+      --passwords <passwords>    Sets the password for both files (if it's the same for both files)
+      --same-password            Asks for password only once, and tries to open both files with it
+      --no-password-a            Sets no password for the first file (and will not ask for it)
+      --no-password-b            Sets no password for the second file (and will not ask for it)
+      --no-passwords             Sets no password for both files (and will not ask for both files)
+      --keyfile-a <keyfile-a>    Sets the key file for the first file
+      --keyfile-b <keyfile-b>    Sets the key file for the second file
+      --keyfiles <keyfiles>      Sets the same key file for both files (keyfile-a and keyfile-b would take
+                                 precedence if set as well)
+  -h, --help                     Print help
+  -V, --version                  Print version
 ```
 
 ## Used libraries:
@@ -146,4 +152,19 @@ to see if the outputs is correct. Best run as
 ## Contributing
 
 Care to help? I'm pretty new to Rust, so if anyone likes to help or teach me
-cool stuff, please reach out!
+cool stuff, please feel free to
+[reach out to me on X](https://twitter.com/NarigoDF),
+[my GitHub profile](https://github.com/Narigo),
+[my website](https://narigo.dev/) or by
+[opening an issue in the keepass-diff repository](https://github.com/Narigo/keepass-diff/issues/new).
+
+### Building docs
+
+It needs to have the `cargo-script` command installed first:
+
+```
+cargo install cargo-script
+```
+
+Then, run `cargo script docs_build.rs` to update the `docs/index.html` from the
+current `README.md` file.

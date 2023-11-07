@@ -100,33 +100,37 @@ It will still ask for a password, if the password flags are not provided.</p>
 <p>If you want to pipe the output of the command into another file or script, you
 may want to disable the terminal colors. You can do so with the <code>--no-color</code> or
 <code>-C</code> option.</p>
+<h3 id="obfuscate-passwords-in-output">Obfuscate passwords in output</h3></h3>
+<p><code>keepass-diff</code> usually shows changed passwords. If you need it to obfuscate
+these protected fields, use <code>--mask-passwords</code> (or <code>-m</code>) to show <code>***</code> instead
+of the real passwords. Be aware that the output can show a changed line without
+actual visible changes in the output then.</p>
 <p><code>--help</code> yields:</p>
-<pre><code>keepass-diff 1.1.4
-Joern Bernhardt &lt;joern.bernhardt@googlemail.com&gt;
-This CLI-tool reads two Keepass (.kdbx) files and prints their differences.
+<pre><code>This CLI-tool reads two Keepass (.kdbx) files and prints their differences.
 
-USAGE:
-    keepass-diff [OPTIONS] &lt;INPUT-A&gt; &lt;INPUT-B&gt;
+Usage: keepass-diff [OPTIONS] &lt;INPUT-A&gt; &lt;INPUT-B&gt;
 
-ARGS:
-    &lt;INPUT-A&gt;    Sets the first file
-    &lt;INPUT-B&gt;    Sets the second file
+Arguments:
+  &lt;INPUT-A&gt;  Sets the first file
+  &lt;INPUT-B&gt;  Sets the second file
 
-OPTIONS:
-    -C, --no-color                   Disables color output
-    -h, --help                       Print help information
-        --keyfile-a &lt;keyfile-a&gt;      Sets the key file for the first file
-        --keyfile-b &lt;keyfile-b&gt;      Sets the key file for the second file
-        --keyfiles &lt;keyfiles&gt;        Sets the same key file for both files (keyfile-a and keyfile-b would take precedence if set as well)
-        --no-password-a              Sets no password for the first file (and will not ask for it)
-        --no-password-b              Sets no password for the second file (and will not ask for it)
-        --no-passwords               Sets no password for both files (and will not ask for both files)
-        --password-a &lt;password-a&gt;    Sets the password for the first file (will be asked for if omitted)
-        --password-b &lt;password-b&gt;    Sets the password for the second file (will be asked for if omitted)
-        --passwords &lt;passwords&gt;      Sets the password for both files (if it's the same for both files)
-        --same-password              Asks for password only once, and tries to open both files with it
-    -v, --verbose                    Enables verbose output
-    -V, --version                    Print version information
+Options:
+  -C, --no-color                 Disables color output
+  -v, --verbose                  Enables verbose output
+  -m, --mask-passwords           Enables verbose output
+      --password-a &lt;password-a&gt;  Sets the password for the first file (will be asked for if omitted)
+      --password-b &lt;password-b&gt;  Sets the password for the second file (will be asked for if omitted)
+      --passwords &lt;passwords&gt;    Sets the password for both files (if it's the same for both files)
+      --same-password            Asks for password only once, and tries to open both files with it
+      --no-password-a            Sets no password for the first file (and will not ask for it)
+      --no-password-b            Sets no password for the second file (and will not ask for it)
+      --no-passwords             Sets no password for both files (and will not ask for both files)
+      --keyfile-a &lt;keyfile-a&gt;    Sets the key file for the first file
+      --keyfile-b &lt;keyfile-b&gt;    Sets the key file for the second file
+      --keyfiles &lt;keyfiles&gt;      Sets the same key file for both files (keyfile-a and keyfile-b would take
+                                 precedence if set as well)
+  -h, --help                     Print help
+  -V, --version                  Print version
 </code></pre>
 <h2 id="used-libraries">Used libraries:</h2></h2>
 <ul>
@@ -144,7 +148,17 @@ to see if the outputs is correct. Best run as
 <code>RUSTFLAGS=&quot;-C target-cpu=native&quot; ./run-tests.sh</code> for improved performance.</p>
 <h2 id="contributing">Contributing</h2></h2>
 <p>Care to help? I'm pretty new to Rust, so if anyone likes to help or teach me
-cool stuff, please reach out!</p>
+cool stuff, please feel free to
+<a href="https://twitter.com/NarigoDF">reach out to me on X</a>,
+<a href="https://github.com/Narigo">my GitHub profile</a>,
+<a href="https://narigo.dev/">my website</a> or by
+<a href="https://github.com/Narigo/keepass-diff/issues/new">opening an issue in the keepass-diff repository</a>.</p>
+<h3 id="building-docs">Building docs</h3></h3>
+<p>It needs to have the <code>cargo-script</code> command installed first:</p>
+<pre><code>cargo install cargo-script
+</code></pre>
+<p>Then, run <code>cargo script docs_build.rs</code> to update the <code>docs/index.html</code> from the
+current <code>README.md</code> file.</p>
 
     </div>
   </body>
