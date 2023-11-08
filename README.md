@@ -138,7 +138,16 @@ Options:
 - [keepass](https://github.com/sseemayer/keepass-rs) to read `.kdbx` files.
 - [termcolor](https://github.com/BurntSushi/termcolor) to print with colors.
 
-## Testing
+## Contributing
+
+Care to help? I'm pretty new to Rust, so if anyone likes to help or teach me
+cool stuff, please feel free to
+[reach out to me on X](https://twitter.com/NarigoDF),
+[my GitHub profile](https://github.com/Narigo),
+[my website](https://narigo.dev/) or by
+[opening an issue in the keepass-diff repository](https://github.com/Narigo/keepass-diff/issues/new).
+
+### Testing
 
 Password for the Keepass demo files: `demopass`.
 
@@ -148,15 +157,6 @@ Password for the Keepass demo files: `demopass`.
 A small bash script for running tests is `run-tests.sh`. It will run a few tests
 to see if the outputs is correct. Best run as
 `RUSTFLAGS="-C target-cpu=native" ./run-tests.sh` for improved performance.
-
-## Contributing
-
-Care to help? I'm pretty new to Rust, so if anyone likes to help or teach me
-cool stuff, please feel free to
-[reach out to me on X](https://twitter.com/NarigoDF),
-[my GitHub profile](https://github.com/Narigo),
-[my website](https://narigo.dev/) or by
-[opening an issue in the keepass-diff repository](https://github.com/Narigo/keepass-diff/issues/new).
 
 ### Building docs
 

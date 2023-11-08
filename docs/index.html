@@ -139,13 +139,6 @@ Options:
 <li><a href="https://github.com/sseemayer/keepass-rs">keepass</a> to read <code>.kdbx</code> files.</li>
 <li><a href="https://github.com/BurntSushi/termcolor">termcolor</a> to print with colors.</li>
 </ul>
-<h2 id="testing">Testing</h2></h2>
-<p>Password for the Keepass demo files: <code>demopass</code>.</p>
-<p><code>test_file.kdbx</code> is locked without password and keyfile <code>keyfile.key</code>.
-<code>test2_file.kdbx</code> is locked with <code>demopass</code> and the keyfile <code>keyfile.key</code>.</p>
-<p>A small bash script for running tests is <code>run-tests.sh</code>. It will run a few tests
-to see if the outputs is correct. Best run as
-<code>RUSTFLAGS=&quot;-C target-cpu=native&quot; ./run-tests.sh</code> for improved performance.</p>
 <h2 id="contributing">Contributing</h2></h2>
 <p>Care to help? I'm pretty new to Rust, so if anyone likes to help or teach me
 cool stuff, please feel free to
@@ -153,6 +146,13 @@ cool stuff, please feel free to
 <a href="https://github.com/Narigo">my GitHub profile</a>,
 <a href="https://narigo.dev/">my website</a> or by
 <a href="https://github.com/Narigo/keepass-diff/issues/new">opening an issue in the keepass-diff repository</a>.</p>
+<h3 id="testing">Testing</h3></h3>
+<p>Password for the Keepass demo files: <code>demopass</code>.</p>
+<p><code>test_file.kdbx</code> is locked without password and keyfile <code>keyfile.key</code>.
+<code>test2_file.kdbx</code> is locked with <code>demopass</code> and the keyfile <code>keyfile.key</code>.</p>
+<p>A small bash script for running tests is <code>run-tests.sh</code>. It will run a few tests
+to see if the outputs is correct. Best run as
+<code>RUSTFLAGS=&quot;-C target-cpu=native&quot; ./run-tests.sh</code> for improved performance.</p>
 <h3 id="building-docs">Building docs</h3></h3>
 <p>It needs to have the <code>cargo-script</code> command installed first:</p>
 <pre><code>cargo install cargo-script
