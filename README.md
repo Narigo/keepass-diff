@@ -147,7 +147,16 @@ cool stuff, please feel free to
 [my website](https://narigo.dev/) or by
 [opening an issue in the keepass-diff repository](https://github.com/Narigo/keepass-diff/issues/new).
 
+In general, I'm trying to avoid breaking changes with this tool. If you think an
+option should be added or made to a default, this can be discussed in an issue.
+I would prefer adding an option first and collect multiple of these changes
+before releasing a new major version with breaking changes.
+
 ### Testing
+
+There are unit tests (`cargo test`) and end-to-end tests (`./run-tests.sh`).
+Both test suites help find regressions in the code and should be checked before
+sending a pull request.
 
 Password for the Keepass demo files: `demopass`.
 

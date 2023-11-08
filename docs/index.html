@@ -146,7 +146,14 @@ cool stuff, please feel free to
 <a href="https://github.com/Narigo">my GitHub profile</a>,
 <a href="https://narigo.dev/">my website</a> or by
 <a href="https://github.com/Narigo/keepass-diff/issues/new">opening an issue in the keepass-diff repository</a>.</p>
+<p>In general, I'm trying to avoid breaking changes with this tool. If you think an
+option should be added or made to a default, this can be discussed in an issue.
+I would prefer adding an option first and collect multiple of these changes
+before releasing a new major version with breaking changes.</p>
 <h3 id="testing">Testing</h3></h3>
+<p>There are unit tests (<code>cargo test</code>) and end-to-end tests (<code>./run-tests.sh</code>).
+Both test suites help find regressions in the code and should be checked before
+sending a pull request.</p>
 <p>Password for the Keepass demo files: <code>demopass</code>.</p>
 <p><code>test_file.kdbx</code> is locked without password and keyfile <code>keyfile.key</code>.
 <code>test2_file.kdbx</code> is locked with <code>demopass</code> and the keyfile <code>keyfile.key</code>.</p>
