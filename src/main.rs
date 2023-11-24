@@ -47,11 +47,11 @@ struct Args {
     password_b: Option<String>,
 
     /// Sets the password for both files (if it's the same for both files)
-    #[clap(name = "passwords", long)]
+    #[clap(name = "passwords", long, short)]
     passwords: Option<String>,
 
     /// Asks for password only once, and tries to open both files with it
-    #[clap(name = "same-password", long)]
+    #[clap(name = "same-password", long, short)]
     same_password: bool,
 
     /// Sets no password for the first file (and will not ask for it)
