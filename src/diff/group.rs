@@ -23,23 +23,21 @@ impl Group {
 
         let mut child_groups: HashMap<String, Vec<Group>> = HashMap::new();
         for node in group.children.iter() {
-            match node {
-                keepass::db::Node::Group(g) => child_groups
+            if let keepass::db::Node::Group(g) = node {
+                child_groups
                     .entry(g.name.clone())
-                    .or_insert(Vec::new())
-                    .push(Group::from_keepass(g, use_verbose, mask_passwords)),
-                _ => {}
+                    .or_default()
+                    .push(Group::from_keepass(g, use_verbose, mask_passwords));
             }
         }
 
         let mut entries: HashMap<String, Vec<Entry>> = HashMap::new();
         for node in group.children.iter() {
-            match node {
-                keepass::db::Node::Entry(e) => entries
+            if let keepass::db::Node::Entry(e) = node {
+                entries
                     .entry(e.get("Title").unwrap_or_default().to_owned())
-                    .or_insert(Vec::new())
-                    .push(Entry::from_keepass(e, use_verbose, mask_passwords)),
-                _ => {}
+                    .or_default()
+                    .push(Entry::from_keepass(e, use_verbose, mask_passwords));
             }
         }
 
@@ -72,15 +70,15 @@ impl Diff for Group {
             crate::diff::diff_hashmap(&self.entries, &other.entries);
 
         if has_differences_groups || has_differences_entries {
-            let mut inner_differences: Vec<Box<dyn DiffResultFormat>> = Vec::new();
-
-            for dr in acc_groups {
-                inner_differences.push(Box::new(dr));
-            }
-
-            for dr in acc_entries {
-                inner_differences.push(Box::new(dr));
-            }
+            let inner_differences = acc_groups
+                .into_iter()
+                .map(|dr| Box::new(dr) as Box<dyn DiffResultFormat>)
+                .chain(
+                    acc_entries
+                        .into_iter()
+                        .map(|dr| Box::new(dr) as Box<dyn DiffResultFormat>),
+                )
+                .collect();
 
             DiffResult::InnerDifferences {
                 left: self,

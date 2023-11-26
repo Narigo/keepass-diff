@@ -7,13 +7,12 @@ license = "MIT"
 readme = "README.md"
 version = "1.2.0"
 authors = ["Joern Bernhardt <joern.bernhardt@googlemail.com>"]
+edition = "2021"
 
 # See https://crates.io/category_slugs
 categories = ["command-line-utilities"]
 
-exclude = [
-  "docs/*"
-]
+exclude = ["docs/*"]
 
 [dependencies]
 base64 = "0.21.5"

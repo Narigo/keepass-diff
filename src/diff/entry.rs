@@ -1,43 +1,29 @@
-use base64::{engine::general_purpose, Engine as _};
-use keepass::db::Value;
 use std::collections::HashMap;
 
-use crate::diff::field::{Field, ValueType};
+use crate::diff::field::Field;
 use crate::diff::{Diff, DiffResult, DiffResultFormat};
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Entry {
-    pub fields: HashMap<String, Field>,
+    fields: HashMap<String, Field>,
     use_verbose: bool,
     mask_passwords: bool,
 }
 
 impl Entry {
-    pub fn from_keepass(e: &keepass::db::Entry, use_verbose: bool, mask_passwords: bool) -> Self {
+    pub fn from_keepass(
+        entry: &keepass::db::Entry,
+        use_verbose: bool,
+        mask_passwords: bool,
+    ) -> Self {
         // username, password, etc. are just fields
-        let fields = e
+        let fields = entry
             .fields
             .iter()
-            .map(|(k, v)| {
+            .map(|(key, value)| {
                 (
-                    k.to_owned(),
-                    Field {
-                        name: k.to_owned(),
-                        value: match v {
-                            Value::Bytes(b) => general_purpose::STANDARD_NO_PAD.encode(b),
-                            Value::Unprotected(v) => v.to_owned(),
-                            Value::Protected(p) => String::from_utf8(p.unsecure().to_owned())
-                                .unwrap()
-                                .to_owned(),
-                        },
-                        kind: match v {
-                            Value::Bytes(_) => ValueType::Binary,
-                            Value::Unprotected(_) => ValueType::Unprotected,
-                            Value::Protected(_) => ValueType::Protected,
-                        },
-                        use_verbose,
-                        mask_passwords,
-                    },
+                    key.to_owned(),
+                    Field::from_keepass(key.to_owned(), value, use_verbose, mask_passwords),
                 )
             })
             .collect();
@@ -56,11 +42,10 @@ impl Diff for Entry {
             crate::diff::diff_entry(&self.fields, &other.fields);
 
         if has_differences {
-            let mut inner_differences: Vec<Box<dyn DiffResultFormat>> = Vec::new();
-
-            for dr in field_differences {
-                inner_differences.push(Box::new(dr))
-            }
+            let inner_differences = field_differences
+                .into_iter()
+                .map(|dr| Box::new(dr) as Box<dyn DiffResultFormat>)
+                .collect();
 
             DiffResult::InnerDifferences {
                 left: self,
@@ -78,18 +63,7 @@ impl Diff for Entry {
 
 impl std::fmt::Display for Entry {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        let name = self
-            .fields
-            .get("Title")
-            .unwrap_or(&Field {
-                name: "Title".to_string(),
-                value: "".to_string(),
-                kind: ValueType::Unprotected,
-                use_verbose: self.use_verbose,
-                mask_passwords: self.mask_passwords,
-            })
-            .value
-            .clone();
+        let name = self.fields.get("Title").map(|f| f.value()).unwrap_or("");
         if self.use_verbose {
             write!(f, "Entry '{}'", name)
         } else {
