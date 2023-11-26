@@ -1,11 +1,10 @@
 use std::collections::{HashMap, HashSet};
 use termcolor::Color;
 
-use stack::Stack;
-
-pub mod entry;
-pub mod field;
-pub mod group;
+mod entry;
+mod field;
+mod group;
+pub use group::Group;
 
 /// The possible outcomes of diffing two objects against another
 #[derive(Debug)]
@@ -39,7 +38,7 @@ pub trait DiffResultFormat: std::fmt::Debug {
     fn diff_result_format(
         &self,
         f: &mut std::fmt::Formatter<'_>,
-        path: &Stack<&String>,
+        path: &[String],
         use_color: bool,
         use_verbose: bool,
         mask_passwords: bool,
@@ -47,18 +46,30 @@ pub trait DiffResultFormat: std::fmt::Debug {
 }
 
 /// Helper wrapper to impl Display for a DiffResult with user-specified settings
-pub struct DiffDisplay<'a, T: DiffResultFormat> {
-    pub inner: T,
-    pub path: Stack<&'a String>,
-    pub use_color: bool,
-    pub use_verbose: bool,
-    pub mask_passwords: bool,
+pub struct DiffDisplay<T: DiffResultFormat> {
+    inner: T,
+    path: Vec<String>,
+    use_color: bool,
+    use_verbose: bool,
+    mask_passwords: bool,
 }
 
-impl<'a, T: DiffResultFormat> std::fmt::Display for DiffDisplay<'a, T> {
-    fn fmt(&self, mut f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl<T: DiffResultFormat> DiffDisplay<T> {
+    pub fn new(inner: T, use_color: bool, use_verbose: bool, mask_passwords: bool) -> Self {
+        Self {
+            inner,
+            path: Vec::new(),
+            use_color,
+            use_verbose,
+            mask_passwords,
+        }
+    }
+}
+
+impl<T: DiffResultFormat> std::fmt::Display for DiffDisplay<T> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let result = self.inner.diff_result_format(
-            &mut f,
+            f,
             &self.path,
             self.use_color,
             self.use_verbose,
@@ -78,8 +89,8 @@ where
 {
     fn diff_result_format(
         &self,
-        mut f: &mut std::fmt::Formatter<'_>,
-        path: &Stack<&String>,
+        f: &mut std::fmt::Formatter<'_>,
+        path: &[String],
         use_color: bool,
         use_verbose: bool,
         mask_passwords: bool,
@@ -92,26 +103,18 @@ where
                 }
                 if use_verbose {
                     let indent = "  ".repeat(path.len());
-                    write!(f, "- {}{}\n", indent, left)?;
+                    writeln!(f, "- {}{}", indent, left)?;
                 } else {
-                    write!(
-                        f,
-                        "- {}\n",
-                        path.append(&format!("{}", left)).mk_string("[", ", ", "]")
-                    )?;
+                    writeln!(f, "- [{}, {}]", path.join(", "), left)?;
                 }
                 if use_color {
                     crate::set_fg(Some(Color::Green));
                 }
                 if use_verbose {
                     let indent = "  ".repeat(path.len());
-                    write!(f, "+ {}{}\n", indent, right)
+                    writeln!(f, "+ {}{}", indent, right)
                 } else {
-                    write!(
-                        f,
-                        "+ {}\n",
-                        path.append(&format!("{}", right)).mk_string("[", ", ", "]")
-                    )
+                    writeln!(f, "+ [{}, {}]", path.join(", "), right)
                 }
             }
             DiffResult::InnerDifferences {
@@ -124,16 +127,12 @@ where
                         crate::set_fg(Some(Color::Yellow));
                     }
                     let indent = "  ".repeat(path.len());
-                    write!(f, "~ {}{}\n", indent, left)?;
+                    writeln!(f, "~ {}{}", indent, left)?;
                 }
                 for id in inner_differences {
-                    id.diff_result_format(
-                        &mut f,
-                        &path.append(&format!("{}", left)),
-                        use_color,
-                        use_verbose,
-                        mask_passwords,
-                    )?;
+                    let mut new_path = path.to_owned();
+                    new_path.push(left.to_string());
+                    id.diff_result_format(f, &new_path, use_color, use_verbose, mask_passwords)?;
                 }
                 Ok(())
             }
@@ -143,13 +142,9 @@ where
                 }
                 if use_verbose {
                     let indent = "  ".repeat(path.len());
-                    write!(f, "- {}{}\n", indent, left)
+                    writeln!(f, "- {}{}", indent, left)
                 } else {
-                    write!(
-                        f,
-                        "- {}\n",
-                        path.append(&format!("{}", left)).mk_string("[", ", ", "]")
-                    )
+                    writeln!(f, "- [{}, {}]", path.join(", "), left)
                 }
             }
             DiffResult::OnlyRight { right } => {
@@ -158,13 +153,9 @@ where
                 }
                 if use_verbose {
                     let indent = "  ".repeat(path.len());
-                    write!(f, "+ {}{}\n", indent, right)
+                    writeln!(f, "+ {}{}", indent, right)
                 } else {
-                    write!(
-                        f,
-                        "+ {}\n",
-                        path.append(&format!("{}", right)).mk_string("[", ", ", "]")
-                    )
+                    writeln!(f, "+ [{}, {}]", path.join(", "), right)
                 }
             }
         };
@@ -182,11 +173,13 @@ pub fn diff_entry<'a, A>(
 where
     A: Diff,
 {
-    let mut keys = HashSet::new();
-    keys.extend(a.keys());
-    keys.extend(b.keys());
+    let mut keys = a
+        .keys()
+        .chain(b.keys())
+        .collect::<HashSet<_>>()
+        .into_iter()
+        .collect::<Vec<_>>();
 
-    let mut keys: Vec<_> = keys.iter().collect();
     keys.sort();
 
     let mut acc: Vec<DiffResult<A>> = Vec::new();
@@ -194,8 +187,8 @@ where
     let mut has_differences = false;
 
     for key in keys {
-        let el_a: Option<&A> = a.get(*key);
-        let el_b: Option<&A> = b.get(*key);
+        let el_a: Option<&A> = a.get(key);
+        let el_b: Option<&A> = b.get(key);
 
         match (el_a, el_b) {
             // both a and b have the key
@@ -237,11 +230,13 @@ pub fn diff_hashmap<'a, A>(
 where
     A: Diff,
 {
-    let mut keys = HashSet::new();
-    keys.extend(a.keys());
-    keys.extend(b.keys());
+    let mut keys = a
+        .keys()
+        .chain(b.keys())
+        .collect::<HashSet<_>>()
+        .into_iter()
+        .collect::<Vec<_>>();
 
-    let mut keys: Vec<_> = keys.iter().collect();
     keys.sort();
 
     let mut acc: Vec<DiffResult<A>> = Vec::new();
@@ -249,13 +244,13 @@ where
     let mut has_differences = false;
 
     for key in keys {
-        let el_a: Option<&Vec<A>> = a.get(*key);
-        let el_b: Option<&Vec<A>> = b.get(*key);
+        let el_a: Option<&Vec<A>> = a.get(key);
+        let el_b: Option<&Vec<A>> = b.get(key);
 
         match (el_a, el_b) {
             // both a and b have the key
             (Some(v_a), Some(v_b)) => {
-                v_a.into_iter()
+                v_a.iter()
                     .enumerate()
                     .for_each(|(index, value_a)| match v_b.get(index) {
                         Some(value_b) => {
@@ -274,7 +269,7 @@ where
                 if v_a.len() < v_b.len() {
                     has_differences = true;
                     v_b[v_a.len()..]
-                        .into_iter()
+                        .iter()
                         .for_each(|value_b| acc.push(DiffResult::OnlyRight { right: value_b }));
                 }
             }
@@ -282,13 +277,13 @@ where
             // only a has the key
             (Some(v_a), None) => {
                 has_differences = true;
-                v_a.into_iter()
+                v_a.iter()
                     .for_each(|e| acc.push(DiffResult::OnlyLeft { left: e }));
             }
             // only b has the key
             (None, Some(v_b)) => {
                 has_differences = true;
-                v_b.into_iter()
+                v_b.iter()
                     .for_each(|e| acc.push(DiffResult::OnlyRight { right: e }));
             }
 
@@ -302,9 +297,7 @@ where
 
 #[cfg(test)]
 mod test {
-
-    use super::*;
-    use diff::group::Group;
+    use super::{group::Group, *};
 
     #[test]
     fn diff_empty_groups() {
@@ -312,6 +305,6 @@ mod test {
         let b = HashMap::<String, Vec<Group>>::new();
         let (has_differences, _) = diff_hashmap(&a, &b);
 
-        assert_eq!(false, has_differences);
+        assert!(!has_differences);
     }
 }
