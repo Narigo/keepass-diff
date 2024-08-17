@@ -1,3 +1,4 @@
+use std::fmt::Display;
 use std::rc::Rc;
 
 pub struct Stack<T> {
@@ -43,11 +44,15 @@ impl<T> Stack<T> {
     }
 }
 
-impl<T: std::fmt::Display> Stack<T> {
-    pub fn to_string(&self) -> String {
-        self.mk_string("Stack(", ", ", ")")
+impl<T: Display> Display for Stack<T> {
+    #[inline]
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.mk_string("Stack(", ", ", ")"))
     }
+}
 
+impl<T: Display> Stack<T> {
+    #[inline]
     pub fn mk_string(
         &self,
         start: &'static str,
@@ -64,6 +69,7 @@ impl<T: std::fmt::Display> Stack<T> {
         }
     }
 
+    #[inline]
     fn mk_string_helper(&self, separator: &'static str) -> String {
         match self.head() {
             Some(value) => format!(
@@ -72,7 +78,7 @@ impl<T: std::fmt::Display> Stack<T> {
                 value,
                 separator,
             ),
-            None => format!(""),
+            None => String::new(),
         }
     }
 }

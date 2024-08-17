@@ -82,60 +82,59 @@ struct Args {
 fn main() -> Result<(), ()> {
     let arguments = Args::parse();
 
-    match (arguments.input_a, arguments.input_b) {
-        (file_a, file_b) => {
-            let pass_a = match (
-                arguments.password_a,
-                arguments.passwords.clone(),
-                arguments.same_password,
-                arguments.no_password_a,
-                arguments.no_passwords,
-            ) {
-                (Some(password), _, _, _, _) => Some(String::from(password)),
-                (_, Some(password), _, _, _) => Some(String::from(password)),
-                (_, _, true, _, _) => prompt_password("Password for both files: "),
-                (_, _, _, true, _) => None,
-                (_, _, _, _, true) => None,
-                _ => prompt_password(format!("Password for file {}: ", file_a).as_str()),
-            };
-            let pass_b = match (
-                arguments.password_b,
-                arguments.passwords.clone(),
-                arguments.same_password,
-                arguments.no_password_b,
-                arguments.no_passwords,
-            ) {
-                (Some(password), _, _, _, _) => Some(String::from(password)),
-                (_, Some(password), _, _, _) => Some(String::from(password)),
-                (_, _, true, _, _) => pass_a.clone(),
-                (_, _, _, true, _) => None,
-                (_, _, _, _, true) => None,
-                _ => prompt_password(format!("Password for file {}: ", file_b).as_str()),
-            };
-            let keyfile_a: Option<String> = arguments.keyfile_a.or(arguments.keyfiles.clone());
-            let keyfile_b: Option<String> = arguments.keyfile_b.or(arguments.keyfiles.clone());
-            let use_color: bool = !arguments.no_color;
-            let use_verbose: bool = arguments.verbose;
-            let mask_passwords: bool = arguments.mask_passwords;
+    let (file_a, file_b) = (&arguments.input_a, &arguments.input_b);
+    {
+        let pass_a = match (
+            arguments.password_a,
+            arguments.passwords.clone(),
+            arguments.same_password,
+            arguments.no_password_a,
+            arguments.no_passwords,
+        ) {
+            (Some(password), _, _, _, _) => Some(password),
+            (_, Some(password), _, _, _) => Some(password),
+            (_, _, true, _, _) => prompt_password("Password for both files: "),
+            (_, _, _, true, _) => None,
+            (_, _, _, _, true) => None,
+            _ => prompt_password(format!("Password for file {}: ", file_a).as_str()),
+        };
+        let pass_b = match (
+            arguments.password_b,
+            arguments.passwords.clone(),
+            arguments.same_password,
+            arguments.no_password_b,
+            arguments.no_passwords,
+        ) {
+            (Some(password), _, _, _, _) => Some(password),
+            (_, Some(password), _, _, _) => Some(password),
+            (_, _, true, _, _) => pass_a.clone(),
+            (_, _, _, true, _) => None,
+            (_, _, _, _, true) => None,
+            _ => prompt_password(format!("Password for file {}: ", file_b).as_str()),
+        };
+        let keyfile_a: Option<String> = arguments.keyfile_a.or(arguments.keyfiles.clone());
+        let keyfile_b: Option<String> = arguments.keyfile_b.or(arguments.keyfiles.clone());
+        let use_color: bool = !arguments.no_color;
+        let use_verbose: bool = arguments.verbose;
+        let mask_passwords: bool = arguments.mask_passwords;
 
-            let db_a = kdbx_to_group(file_a, pass_a, keyfile_a, use_verbose, mask_passwords)
-                .expect("Error opening database A");
-            let db_b = kdbx_to_group(file_b, pass_b, keyfile_b, use_verbose, mask_passwords)
-                .expect("Error opening database B");
+        let db_a = kdbx_to_group(file_a, pass_a, keyfile_a, use_verbose, mask_passwords)
+            .expect("Error opening database A");
+        let db_b = kdbx_to_group(file_b, pass_b, keyfile_b, use_verbose, mask_passwords)
+            .expect("Error opening database B");
 
-            let delta = db_a.diff(&db_b);
+        let delta = db_a.diff(&db_b);
 
-            println!(
-                "{}",
-                DiffDisplay {
-                    inner: delta,
-                    path: stack::Stack::empty(),
-                    use_color,
-                    use_verbose,
-                    mask_passwords,
-                }
-            );
-        }
+        println!(
+            "{}",
+            DiffDisplay {
+                inner: delta,
+                path: stack::Stack::empty(),
+                use_color,
+                use_verbose,
+                mask_passwords,
+            }
+        );
     }
 
     Ok(())
@@ -143,12 +142,12 @@ fn main() -> Result<(), ()> {
 
 fn prompt_password(prompt: &str) -> Option<String> {
     rpassword::prompt_password(prompt)
-        .map(|s| if s == "" { None } else { Some(s) })
+        .map(|s| if s.is_empty() { None } else { Some(s) })
         .unwrap_or(None)
 }
 
 pub fn kdbx_to_group(
-    file: String,
+    file: &str,
     password: Option<String>,
     keyfile_path: Option<String>,
     use_verbose: bool,

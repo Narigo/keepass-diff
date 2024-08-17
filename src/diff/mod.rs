@@ -56,9 +56,9 @@ pub struct DiffDisplay<'a, T: DiffResultFormat> {
 }
 
 impl<'a, T: DiffResultFormat> std::fmt::Display for DiffDisplay<'a, T> {
-    fn fmt(&self, mut f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let result = self.inner.diff_result_format(
-            &mut f,
+            f,
             &self.path,
             self.use_color,
             self.use_verbose,
@@ -78,7 +78,7 @@ where
 {
     fn diff_result_format(
         &self,
-        mut f: &mut std::fmt::Formatter<'_>,
+        f: &mut std::fmt::Formatter<'_>,
         path: &Stack<&String>,
         use_color: bool,
         use_verbose: bool,
@@ -92,11 +92,11 @@ where
                 }
                 if use_verbose {
                     let indent = "  ".repeat(path.len());
-                    write!(f, "- {}{}\n", indent, left)?;
+                    writeln!(f, "- {}{}", indent, left)?;
                 } else {
-                    write!(
+                    writeln!(
                         f,
-                        "- {}\n",
+                        "- {}",
                         path.append(&format!("{}", left)).mk_string("[", ", ", "]")
                     )?;
                 }
@@ -105,11 +105,11 @@ where
                 }
                 if use_verbose {
                     let indent = "  ".repeat(path.len());
-                    write!(f, "+ {}{}\n", indent, right)
+                    writeln!(f, "+ {}{}", indent, right)
                 } else {
-                    write!(
+                    writeln!(
                         f,
-                        "+ {}\n",
+                        "+ {}",
                         path.append(&format!("{}", right)).mk_string("[", ", ", "]")
                     )
                 }
@@ -124,11 +124,11 @@ where
                         crate::set_fg(Some(Color::Yellow));
                     }
                     let indent = "  ".repeat(path.len());
-                    write!(f, "~ {}{}\n", indent, left)?;
+                    writeln!(f, "~ {}{}", indent, left)?;
                 }
                 for id in inner_differences {
                     id.diff_result_format(
-                        &mut f,
+                        f,
                         &path.append(&format!("{}", left)),
                         use_color,
                         use_verbose,
@@ -143,11 +143,11 @@ where
                 }
                 if use_verbose {
                     let indent = "  ".repeat(path.len());
-                    write!(f, "- {}{}\n", indent, left)
+                    writeln!(f, "- {}{}", indent, left)
                 } else {
-                    write!(
+                    writeln!(
                         f,
-                        "- {}\n",
+                        "- {}",
                         path.append(&format!("{}", left)).mk_string("[", ", ", "]")
                     )
                 }
@@ -158,11 +158,11 @@ where
                 }
                 if use_verbose {
                     let indent = "  ".repeat(path.len());
-                    write!(f, "+ {}{}\n", indent, right)
+                    writeln!(f, "+ {}{}", indent, right)
                 } else {
-                    write!(
+                    writeln!(
                         f,
-                        "+ {}\n",
+                        "+ {}",
                         path.append(&format!("{}", right)).mk_string("[", ", ", "]")
                     )
                 }
@@ -255,7 +255,7 @@ where
         match (el_a, el_b) {
             // both a and b have the key
             (Some(v_a), Some(v_b)) => {
-                v_a.into_iter()
+                v_a.iter()
                     .enumerate()
                     .for_each(|(index, value_a)| match v_b.get(index) {
                         Some(value_b) => {
@@ -274,7 +274,7 @@ where
                 if v_a.len() < v_b.len() {
                     has_differences = true;
                     v_b[v_a.len()..]
-                        .into_iter()
+                        .iter()
                         .for_each(|value_b| acc.push(DiffResult::OnlyRight { right: value_b }));
                 }
             }
@@ -282,13 +282,13 @@ where
             // only a has the key
             (Some(v_a), None) => {
                 has_differences = true;
-                v_a.into_iter()
+                v_a.iter()
                     .for_each(|e| acc.push(DiffResult::OnlyLeft { left: e }));
             }
             // only b has the key
             (None, Some(v_b)) => {
                 has_differences = true;
-                v_b.into_iter()
+                v_b.iter()
                     .for_each(|e| acc.push(DiffResult::OnlyRight { right: e }));
             }
 
