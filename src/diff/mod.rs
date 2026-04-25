@@ -173,131 +173,59 @@ where
     }
 }
 
-/// Compare to HashMaps of the same value type with each other, returning a bool indicating whether
-/// there are any differences and a Vec<DiffResult<A>> listing all differences
-pub fn diff_entry<'a, A>(
-    a: &'a HashMap<String, A>,
-    b: &'a HashMap<String, A>,
-) -> (bool, Vec<DiffResult<'a, A>>)
+pub fn diff_hashmap<'a, K, A, F>(
+    a: &'a HashMap<K, A>,
+    b: &'a HashMap<K, A>,
+    order_fn: F,
+) -> Vec<DiffResult<'a, A>>
 where
+    K: std::hash::Hash + Eq + Clone + std::fmt::Debug,
     A: Diff,
+    F: Fn((&K, &A), (&K, &A)) -> std::cmp::Ordering,
 {
-    let mut keys = HashSet::new();
-    keys.extend(a.keys());
-    keys.extend(b.keys());
+    let mut keys: HashSet<K> = HashSet::new();
+    keys.extend(a.keys().cloned());
+    keys.extend(b.keys().cloned());
 
+    // sort keys by order_fn, i.e. groups by names and entries by titles
     let mut keys: Vec<_> = keys.iter().collect();
-    keys.sort();
+    keys.sort_by(|k1, k2| {
+        let v1 = a.get(*k1).or_else(|| b.get(*k1)).unwrap();
+        let v2 = a.get(*k2).or_else(|| b.get(*k2)).unwrap();
+
+        let ord = order_fn((k1, v1), (k2, v2));
+
+        if ord == std::cmp::Ordering::Equal {
+            // if the order_fn returns Equal, we can use the keys to break ties
+            format!("{:?}", k1).cmp(&format!("{:?}", k2))
+        } else {
+            ord
+        }
+    });
 
     let mut acc: Vec<DiffResult<A>> = Vec::new();
 
-    let mut has_differences = false;
-
     for key in keys {
-        let el_a: Option<&A> = a.get(*key);
-        let el_b: Option<&A> = b.get(*key);
+        let Some(el_a): Option<&A> = a.get(&key) else {
+            acc.push(DiffResult::OnlyRight {
+                right: b.get(&key).unwrap(),
+            });
+            continue;
+        };
 
-        match (el_a, el_b) {
-            // both a and b have the key
-            (Some(v_a), Some(v_b)) => {
-                let dr: DiffResult<A> = v_a.diff(v_b);
+        let Some(el_b): Option<&A> = b.get(&key) else {
+            acc.push(DiffResult::OnlyLeft { left: el_a });
+            continue;
+        };
 
-                if let DiffResult::Identical { .. } = dr {
-                } else {
-                    has_differences = true;
-                }
-
-                acc.push(dr);
-            }
-
-            // only a has the key
-            (Some(v_a), None) => {
-                has_differences = true;
-                acc.push(DiffResult::OnlyLeft { left: v_a })
-            }
-
-            // only b has the key
-            (None, Some(v_b)) => {
-                has_differences = true;
-                acc.push(DiffResult::OnlyRight { right: v_b })
-            }
-
-            // none have the key (this shouldn't happen)
-            (None, None) => {}
+        let dr = el_a.diff(el_b);
+        if let DiffResult::Identical { .. } = dr {
+        } else {
+            acc.push(dr);
         }
     }
 
-    (has_differences, acc)
-}
-
-pub fn diff_hashmap<'a, A>(
-    a: &'a HashMap<String, Vec<A>>,
-    b: &'a HashMap<String, Vec<A>>,
-) -> (bool, Vec<DiffResult<'a, A>>)
-where
-    A: Diff,
-{
-    let mut keys = HashSet::new();
-    keys.extend(a.keys());
-    keys.extend(b.keys());
-
-    let mut keys: Vec<_> = keys.iter().collect();
-    keys.sort();
-
-    let mut acc: Vec<DiffResult<A>> = Vec::new();
-
-    let mut has_differences = false;
-
-    for key in keys {
-        let el_a: Option<&Vec<A>> = a.get(*key);
-        let el_b: Option<&Vec<A>> = b.get(*key);
-
-        match (el_a, el_b) {
-            // both a and b have the key
-            (Some(v_a), Some(v_b)) => {
-                v_a.into_iter()
-                    .enumerate()
-                    .for_each(|(index, value_a)| match v_b.get(index) {
-                        Some(value_b) => {
-                            let dr: DiffResult<A> = value_a.diff(value_b);
-                            if let DiffResult::Identical { .. } = dr {
-                            } else {
-                                has_differences = true;
-                            }
-                            acc.push(dr);
-                        }
-                        None => {
-                            has_differences = true;
-                            acc.push(DiffResult::OnlyLeft { left: value_a })
-                        }
-                    });
-                if v_a.len() < v_b.len() {
-                    has_differences = true;
-                    v_b[v_a.len()..]
-                        .into_iter()
-                        .for_each(|value_b| acc.push(DiffResult::OnlyRight { right: value_b }));
-                }
-            }
-
-            // only a has the key
-            (Some(v_a), None) => {
-                has_differences = true;
-                v_a.into_iter()
-                    .for_each(|e| acc.push(DiffResult::OnlyLeft { left: e }));
-            }
-            // only b has the key
-            (None, Some(v_b)) => {
-                has_differences = true;
-                v_b.into_iter()
-                    .for_each(|e| acc.push(DiffResult::OnlyRight { right: e }));
-            }
-
-            // none have the key (this shouldn't happen)
-            (None, None) => {}
-        }
-    }
-
-    (has_differences, acc)
+    acc
 }
 
 #[cfg(test)]
@@ -308,10 +236,10 @@ mod test {
 
     #[test]
     fn diff_empty_groups() {
-        let a = HashMap::<String, Vec<Group>>::new();
-        let b = HashMap::<String, Vec<Group>>::new();
-        let (has_differences, _) = diff_hashmap(&a, &b);
+        let a = HashMap::<String, Group>::new();
+        let b = HashMap::<String, Group>::new();
+        let acc = diff_hashmap(&a, &b, |(_, a), (_, b)| a.name.cmp(&b.name));
 
-        assert_eq!(false, has_differences);
+        assert!(acc.is_empty());
     }
 }
