@@ -14,6 +14,7 @@ use keepass::{error::DatabaseOpenError, Database, DatabaseKey};
 use termcolor::{Color, ColorChoice, ColorSpec, StandardStream, WriteColor};
 
 use std::fs::File;
+use std::path::Path;
 
 #[derive(Parser, Debug)]
 #[clap(author, version, about, long_about = None)]
@@ -84,6 +85,20 @@ fn main() -> Result<(), ()> {
 
     match (arguments.input_a, arguments.input_b) {
         (file_a, file_b) => {
+            let keyfile_a: Option<String> = arguments.keyfile_a.or(arguments.keyfiles.clone());
+            let keyfile_b: Option<String> = arguments.keyfile_b.or(arguments.keyfiles.clone());
+
+            for path in [Some(&file_a), Some(&file_b), keyfile_a.as_ref(), keyfile_b.as_ref()]
+                .iter()
+                .copied()
+                .flatten()
+            {
+                if !Path::new(path).is_file() {
+                    eprintln!("Error: file not found: {}", path);
+                    std::process::exit(1);
+                }
+            }
+
             let pass_a = match (
                 arguments.password_a,
                 arguments.passwords.clone(),
@@ -112,8 +127,6 @@ fn main() -> Result<(), ()> {
                 (_, _, _, _, true) => None,
                 _ => prompt_password(format!("Password for file {}: ", file_b).as_str()),
             };
-            let keyfile_a: Option<String> = arguments.keyfile_a.or(arguments.keyfiles.clone());
-            let keyfile_b: Option<String> = arguments.keyfile_b.or(arguments.keyfiles.clone());
             let use_color: bool = !arguments.no_color;
             let use_verbose: bool = arguments.verbose;
             let mask_passwords: bool = arguments.mask_passwords;
